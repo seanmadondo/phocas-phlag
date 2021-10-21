@@ -1,6 +1,16 @@
-# Power Search
+![Phocas Power Search](./power_search_logo.png)
 
 More ~~propaganda~~ information about this can be found at [https://helpphocassoftware.atlassian.net/wiki/spaces/~904750381/pages/2575237496/Power+Search+UserScript](https://helpphocassoftware.atlassian.net/wiki/spaces/~904750381/pages/2575237496/Power+Search+UserScript).
+
+## Get the Source
+
+Clone the repo and install the dependencies:
+
+```bash
+git clone git@github.com:jpsheehan-phocas/phocas-power-search.git
+cd phocas-power-search
+yarn
+```
 
 ## Build UserScript
 
