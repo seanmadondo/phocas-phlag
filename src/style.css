@@ -1,0 +1,70 @@
+#ppt-search-overlay {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  background-color: black;
+  z-index: 20000000;
+  transition: opacity 0.2s linear;
+}
+
+#ppt-search-container {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  z-index: 20000001;
+  font-family: sans-serif;
+  opacity: 0;
+  transition: opacity 0.2s linear;
+}
+
+#ppt-search-container > div {
+  width: 600px;
+  margin: auto;
+}
+
+#ppt-search-input {
+  font-size: 32pt;
+  width: 100%;
+  color: black;
+  border: 0px;
+  margin: 1em 0em 1em 0em;
+  transition: opacity 0.2s linear;
+}
+
+#ppt-search-results {
+  list-style: none;
+  padding: 0px;
+  margin: 0px;
+  font-size: 32px;
+  color: #ddd;
+  max-height: 20em;
+  overflow-y: auto;
+}
+
+#ppt-search-message {
+  color: orange;
+  font-size: 20px;
+}
+
+#ppt-search-results .smaller {
+  font-size: 16px;
+  color: #eee;
+  margin-left: 0.5em;
+}
+
+#ppt-search-results li {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+#ppt-search-results a {
+  color: inherit;
+  text-decoration: none;
+  vertical-align: middle;
+}

@@ -1,0 +1,25 @@
+{
+  "name": "power-search",
+  "version": "0.1.0",
+  "author": {
+    "email": "jesse.sheehan@phocassoftware.com",
+    "name": "Jesse Sheehan"
+  },
+  "description": "Advanced Phocas Search",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "style-loader": "^3.3.0"
+  },
+  "scripts": {
+    "build": "webpack && node apply-userscript-header.js && clip < .\\dist\\phocas-power-search.bundle.js"
+  },
+  "private": "true",
+  "devDependencies": {
+    "css-loader": "^6.3.0",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.4.3",
+    "webpack": "^5.57.1",
+    "webpack-cli": "^4.9.0"
+  }
+}
