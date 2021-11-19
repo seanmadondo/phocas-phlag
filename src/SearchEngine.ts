@@ -3,7 +3,6 @@ import { ISearchEngine, ISearchResult, IStorageCache } from "./types";
 enum FilterType {
   None,
   Inclusive,
-  Exclusive,
 }
 
 interface ISearchQuery {
@@ -75,23 +74,16 @@ export default class SearchEngine implements ISearchEngine {
     let filter: string | undefined;
     let filterType: FilterType = FilterType.None;
 
-    if (originalQuery.includes("==")) {
-      const parts = originalQuery.split("==", 2);
+    if (originalQuery.includes("=")) {
+      const parts = originalQuery.split("=", 2);
       if (parts.length === 2 && parts[1].length > 0) {
         query = parts[0].trim();
         filter = parts[1].trim();
         filterType = FilterType.Inclusive;
       }
-    } else if (originalQuery.includes("!=")) {
-      const parts = originalQuery.split("!=", 2);
-      if (parts.length === 2 && parts[1].length > 0) {
-        query = parts[0].trim();
-        filter = parts[1].trim();
-        filterType = FilterType.Exclusive;
-      }
     }
 
-    query = query.replace(/[!=]/g, "");
+    query = query.replace(/=/g, "");
 
     return {
       query,
@@ -103,9 +95,9 @@ export default class SearchEngine implements ISearchEngine {
   public async findResults(originalQuery: string) {
     const terms = await this.getSearchTerms();
     const results: ISearchResult[] = [];
-    const query = this.getSearchQuery(originalQuery);
+    const { query, filterType, filter } = this.getSearchQuery(originalQuery);
 
-    if (query.query.length === 0) {
+    if (query.length === 0) {
       return results;
     }
 
@@ -113,19 +105,12 @@ export default class SearchEngine implements ISearchEngine {
       const term = terms[i];
 
       // potentially filter this result out
-      if (
-        query.filterType !== FilterType.None &&
-        typeof query.filter !== "undefined"
-      ) {
-        const filterScore = this.getQueryScore(query.filter, term.type);
-        if (query.filterType === FilterType.Inclusive && filterScore === 0)
-          continue;
-        else if (query.filterType === FilterType.Exclusive && filterScore > 0) {
-          continue;
-        }
+      if (filterType !== FilterType.None && typeof filter !== "undefined") {
+        const filterScore = this.getQueryScore(filter, term.type);
+        if (filterType === FilterType.Inclusive && filterScore === 0) continue;
       }
 
-      const score = this.getQueryScore(query.query, term.value);
+      const score = this.getQueryScore(query, term.value);
 
       results.push({ ...term, score });
     }
