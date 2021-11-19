@@ -1,5 +1,6 @@
-import { ISearchTermProvider } from "../types";
-import { createDynamicLoader, createStaticMenuItem } from "../utils";
+import SearchTerm from "../SearchTerm";
+import { ISearchTermProvider, SearchTermLoadType } from "../types";
+import { createDynamicLoader, createSearchTermType, createStaticMenuItem } from "../utils";
 
 class PhocasSearchTermProvider implements ISearchTermProvider {
 	async loadStaticTerms() {
@@ -32,39 +33,35 @@ class PhocasSearchTermProvider implements ISearchTermProvider {
 
 	async loadDynamicTerms() {
 		const loadDatabases = createDynamicLoader(
-			"database",
 			"/api/databases",
 			"id",
 			"title",
-			"/Administration/Database/Index/?"
+			createSearchTermType('database', "/Administration/Database/Index/?"),
+			createSearchTermType('designer', "/Designer/Index/?")
 		);
 		const loadCustomActions = createDynamicLoader(
-			"custom action",
 			"/api/custom-actions?excludeCode=true",
 			"id",
 			"name",
-			"/Administration/CustomAction/Index/?"
+			createSearchTermType('custom action', "/Administration/CustomAction/Index/?")
 		);
 		const loadDashboards = createDynamicLoader(
-			"dashboard",
 			"/api/dashboards",
 			"id",
 			"name",
-			"/Dashboard/Index/?"
+			createSearchTermType("dashboard", "/Dashboard/Index/?")
 		);
 		const loadUsers = createDynamicLoader(
-			"user",
 			"/api/users",
 			"id",
 			"name",
-			"/Administration/User/Index/?"
+			createSearchTermType("user", "/Administration/User/Index/?")
 		);
 		const loadSources = createDynamicLoader(
-			"source",
 			"/api/sources",
 			"id",
 			"displayName",
-			"/Administration/SyncSource/Index/??tab=items"
+			createSearchTermType("source", "/Administration/SyncSource/Index/??tab=items")
 		);
 
 		const dynamicTerms = [

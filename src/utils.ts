@@ -9,6 +9,13 @@ declare global {
 	interface Window { phocas?: Phocas }
 }
 
+interface SearchTermType {
+	type: string,
+	url_template: string,
+}
+
+const createSearchTermType = (type: string, url_template: string): SearchTermType => ({ type, url_template });
+
 const setImmediate = (fn: () => any) => {
 	setTimeout(fn, 0);
 }
@@ -48,11 +55,10 @@ const capitaliseWords = (s: string) => {
 };
 
 const createDynamicLoader = (
-	type: string,
 	api_url: string,
 	id_key: string,
 	name_key: string,
-	url_template: string
+	...types: SearchTermType[]
 ) => {
 	return async () => {
 		try {
@@ -61,9 +67,11 @@ const createDynamicLoader = (
 				.map((x: { [key: string]: any }) => {
 					const value = x[name_key] ?? "";
 					const id = x[id_key];
-					const url = url_template.replace("?", id);
-					return SearchTerm.fromUrl(value, type, SearchTermLoadType.Dynamic, url);
-				});
+					return types.map((searchTermType) => {
+						const url = searchTermType.url_template.replace("?", id);
+						return SearchTerm.fromUrl(value, searchTermType.type, SearchTermLoadType.Dynamic, url);
+					})
+				}).flat();
 			return terms;
 		} catch {
 			// console.warn(err);
@@ -100,4 +108,4 @@ const shouldPowerSearchStart = async (ctx: ISearchContext) => {
 	return true;
 }
 
-export { isEnvironmentConsole, capitalise, capitaliseWords, createDynamicLoader, createStaticMenuItem, setImmediate, shouldPowerSearchStart };
+export { isEnvironmentConsole, capitalise, capitaliseWords, createDynamicLoader, createStaticMenuItem, setImmediate, shouldPowerSearchStart, createSearchTermType };
