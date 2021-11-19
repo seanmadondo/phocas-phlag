@@ -1,7 +1,19 @@
 const css = require("./style.css");
 import { capitaliseWords, shouldPowerSearchStart } from "./utils";
 import { getDefaultSearchTermProvider } from "./SearchTermProvider";
-import { ISearchTerm, ISearchContext, IStorageCache, IStorageProvider, ISearchFunctionOptions, ISearchUserInterface, ISearchTermProvider, ISearchEngine, ISearchResult, IHtmlBuilder, ISearchHistory } from "./types";
+import {
+  ISearchTerm,
+  ISearchContext,
+  IStorageCache,
+  IStorageProvider,
+  ISearchFunctionOptions,
+  ISearchUserInterface,
+  ISearchTermProvider,
+  ISearchEngine,
+  ISearchResult,
+  IHtmlBuilder,
+  ISearchHistory,
+} from "./types";
 import StorageCache from "./StorageCache";
 import LocalStorageProvider from "./LocalStorageProvider";
 import SearchEngine from "./SearchEngine";
@@ -24,7 +36,11 @@ class PhocasPowerSearch implements ISearchUserInterface, ISearchContext {
 
   searchTermProvider: ISearchTermProvider = getDefaultSearchTermProvider();
   storageProvider: IStorageProvider = new LocalStorageProvider();
-  storageCache: IStorageCache = new StorageCache(this.storageProvider, this.searchTermProvider, CACHE_SECONDS);
+  storageCache: IStorageCache = new StorageCache(
+    this.storageProvider,
+    this.searchTermProvider,
+    CACHE_SECONDS
+  );
   searchEngine: ISearchEngine = new SearchEngine(this.storageCache);
   // private searchHistory: ISearchHistory = new SearchHistory(this.storageProvider, MAX_HISTORY);
   // private searchHistoryIndex = 0;
@@ -42,7 +58,7 @@ class PhocasPowerSearch implements ISearchUserInterface, ISearchContext {
 		</div>
 		`;
     return div;
-  };
+  }
 
   getInput = () => {
     return document.getElementById("ppt-search-input") as HTMLInputElement;
@@ -79,37 +95,44 @@ class PhocasPowerSearch implements ISearchUserInterface, ISearchContext {
   }
 
   updateResultsList = () => {
-    const nodes = this.results
-      .map((result, i) => {
-        const li = document.createElement("li");
-        li.innerHTML = "<a href='#'>" + result.value + (result.type !== "menu"
+    const nodes = this.results.map((result, i) => {
+      const li = document.createElement("li");
+      li.innerHTML =
+        "<a href='#'>" +
+        result.value +
+        (result.type !== "menu"
           ? `<span class='smaller'>(${capitaliseWords(result.type)})</span>`
-          : "") + "</a>";
-        const a = li.querySelector("a");
-        if (a !== null) {
-          a.addEventListener("click", (event) => {
-            event.preventDefault();
-            this.executeResult(i, { newTab: event.shiftKey })
-          });
-          if (i === 0) {
-            // focusing on the first one should focus the input box
-            a.addEventListener("focus", () => {
-              this.getInput().focus();
-            })
-          }
-          a.addEventListener("keydown", (event) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
-              this.executeResult(i, { newTab: event.shiftKey })
-            } else if (event.key === "Tab" && !event.shiftKey && i === this.results.length - 1) {
-              event.preventDefault();
-              this.getInput().focus();
-            }
+          : "") +
+        "</a>";
+      const a = li.querySelector("a");
+      if (a !== null) {
+        a.addEventListener("click", (event) => {
+          event.preventDefault();
+          this.executeResult(i, { newTab: event.shiftKey });
+        });
+        if (i === 0) {
+          // focusing on the first one should focus the input box
+          a.addEventListener("focus", () => {
+            this.getInput().focus();
           });
         }
-        return li
-      })
-    this.getResultsList().replaceChildren(...nodes)
+        a.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            this.executeResult(i, { newTab: event.shiftKey });
+          } else if (
+            event.key === "Tab" &&
+            !event.shiftKey &&
+            i === this.results.length - 1
+          ) {
+            event.preventDefault();
+            this.getInput().focus();
+          }
+        });
+      }
+      return li;
+    });
+    this.getResultsList().replaceChildren(...nodes);
   };
 
   hide() {
@@ -120,7 +143,7 @@ class PhocasPowerSearch implements ISearchUserInterface, ISearchContext {
       return true;
     }
     return false;
-  };
+  }
 
   show = () => {
     if (this.hidden) {
@@ -136,7 +159,7 @@ class PhocasPowerSearch implements ISearchUserInterface, ISearchContext {
 
       this.getInput().addEventListener("focus", (ev: any) => {
         this.getResultsList().scrollTo(0, 0);
-      })
+      });
       this.getInput().addEventListener("input", async (ev: any) => {
         if (this.hidden === false && ev?.target?.value) {
           const newSearchTerm = ev.target.value;
@@ -168,7 +191,9 @@ class PhocasPowerSearch implements ISearchUserInterface, ISearchContext {
                 }
               } else {
                 // find the last result and focus on it
-                const lastAnchor = anchors[anchors.length - 1] as HTMLAnchorElement;
+                const lastAnchor = anchors[
+                  anchors.length - 1
+                ] as HTMLAnchorElement;
                 lastAnchor.focus();
               }
               break;
@@ -204,7 +229,7 @@ class PhocasPowerSearch implements ISearchUserInterface, ISearchContext {
       });
       this.getResultsList().addEventListener("focus", () => {
         this.getInput().focus();
-      })
+      });
 
       document.addEventListener("keydown", this.closeOverlayKeyDownHandler);
 
@@ -228,15 +253,15 @@ class PhocasPowerSearch implements ISearchUserInterface, ISearchContext {
     } else {
       el.style.display = "none";
     }
-  };
+  }
 
   showHtml(html: IHtmlBuilder) {
-    this.showMessage(html.getHtml())
+    this.showMessage(html.getHtml());
   }
 
   clearMessage() {
     this.showMessage("");
-  };
+  }
 
   private fadeIn() {
     return new Promise<void>((resolve) => {
@@ -291,7 +316,7 @@ class PhocasPowerSearch implements ISearchUserInterface, ISearchContext {
         this.hide();
       }
     }
-  };
+  }
 
   clearInput() {
     const input = this.getInput();
@@ -300,11 +325,11 @@ class PhocasPowerSearch implements ISearchUserInterface, ISearchContext {
     }
     this.results = [];
     this.updateResultsList();
-  };
+  }
 
   async loadSearchTerms() {
     this.terms = await this.storageCache.getSearchTerms(false);
-  };
+  }
 
   async reloadSearchTerms() {
     this.terms = await this.storageCache.getSearchTerms(true);
@@ -312,7 +337,7 @@ class PhocasPowerSearch implements ISearchUserInterface, ISearchContext {
 
   async clearSearchTerms() {
     await this.storageCache.clear();
-  };
+  }
 
   public attachEventHandler() {
     document.body.addEventListener("keydown", (ev) => {
@@ -327,7 +352,6 @@ class PhocasPowerSearch implements ISearchUserInterface, ISearchContext {
       }
     });
   }
-
 }
 
 async function main() {
