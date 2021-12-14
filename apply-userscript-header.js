@@ -32,6 +32,9 @@ const userScriptBanner = createUserScriptBanner(
     "https://*.phocasclouddev.com/*",
     "https://*.phocas.ninja/*",
     "http://localhost:8080/*",
+    "https://*.epicoranalytics.com/*",
+	  "https://*.epicoranalytics.com.au/*",
+    "https://*.epicoranalytics.co.uk/*",
   ],
   "phocassoftware.com"
 );
