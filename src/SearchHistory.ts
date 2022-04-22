@@ -44,7 +44,12 @@ export default class SearchHistory implements ISearchHistory {
   private async load(): Promise<string[]> {
     const json = await this.storageProvider.get(SearchHistory.HISTORY_KEY);
     if (json) {
-      return JSON.parse(json) ?? [];
+      try {
+        return JSON.parse(json) ?? [];
+      }
+      catch (_) {
+        return [];
+      }
     }
     return [];
   }
