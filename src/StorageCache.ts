@@ -109,11 +109,16 @@ export default class StorageCache implements IStorageCache {
         return this._searchTerms;
       }
       this.isLoading = true;
-      this._searchTerms = await this.searchTermProvider.loadDynamicTerms();
-      await this.setDynamicSearchTerms(this._searchTerms);
-      await this.setLastUpdated();
-      this.isLoading = false;
-      return this._searchTerms;
+      try {
+        this._searchTerms = await this.searchTermProvider.loadDynamicTerms();
+        await this.setDynamicSearchTerms(this._searchTerms);
+        await this.setLastUpdated();
+        this.isLoading = false;
+        return this._searchTerms;
+      }
+      catch (_err) {
+        return [];
+      }
     }
 
     if (this._searchTerms.length === 0) {

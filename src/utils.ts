@@ -30,8 +30,13 @@ const get = (url: string): Promise<any> => {
     const req = new XMLHttpRequest();
     req.addEventListener("load", function () {
       if (this.status >= 200 && this.status < 400) {
-        const json = JSON.parse(this.responseText);
-        resolve(json);
+        try {
+          const json = JSON.parse(this.responseText);
+          resolve(json);
+        }
+        catch (_) {
+          reject(this.statusText);
+        }
       } else {
         reject(this.statusText);
       }

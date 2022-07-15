@@ -10,12 +10,13 @@ class PhocasSearchTermProvider implements ISearchTermProvider {
   async loadStaticTerms() {
     const staticTerms = [
       createStaticMenuItem("Users", "/Administration/Home/Users"),
+      createStaticMenuItem("New User", "/Administration/User/Index"),
       createStaticMenuItem("Databases", "/Administration/Home/Databases"),
       createStaticMenuItem(
         "Configuration",
         "/Administration/Home/Configuration"
       ),
-      // createStaticMenuItem("Logs", "/Administration/Home/Logs"),
+      createStaticMenuItem("Logs", "/Administration/Home/Logs"),
       createStaticMenuItem(
         "Error Logs",
         "/Administration/Home/Logs?view=Error"
@@ -44,6 +45,10 @@ class PhocasSearchTermProvider implements ISearchTermProvider {
       createStaticMenuItem(
         "Custom Actions",
         "/Administration/Home/CustomActions"
+      ),
+      createStaticMenuItem(
+        "New Custom Action",
+        "/Administration/CustomAction/Index"
       ),
       createStaticMenuItem("Environment", "/Administration/Home/Environment"),
       createStaticMenuItem(
