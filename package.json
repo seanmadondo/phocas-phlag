@@ -1,18 +1,18 @@
 {
-  "name": "power-search",
+  "name": "phocas-phlag",
   "version": "0.1.0",
   "author": {
-    "email": "jesse.sheehan@phocassoftware.com",
-    "name": "Jesse Sheehan"
+    "email": "sean.madondo@phocassoftware.com",
+    "name": "Sean Madondo"
   },
-  "description": "Advanced Phocas Search",
+  "description": "A Phocas Feature Flag Tool",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
     "style-loader": "^3.3.0"
   },
   "scripts": {
-    "build": "webpack && node apply-userscript-header.js && clip < .\\dist\\phocas-power-search.bundle.js",
+    "build": "webpack && node apply-userscript-header.js && clip < .\\dist\\phocas-phlag.bundle.js",
     "lint-fix": "prettier src/**/*.ts --write"
   },
   "private": "true",

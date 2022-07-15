@@ -1,4 +1,4 @@
-![Phocas Power Search](./power_search_logo.png)
+![Phocas Power Search](./phlag_logo.png)
 
 More ~~propaganda~~ information about this can be found at [https://helpphocassoftware.atlassian.net/wiki/spaces/~904750381/pages/2575237496/Power+Search+UserScript](https://helpphocassoftware.atlassian.net/wiki/spaces/~904750381/pages/2575237496/Power+Search+UserScript).
 

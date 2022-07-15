@@ -4,7 +4,7 @@ module.exports = {
   entry: "./src/index.ts",
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "phocas-power-search.bundle.js",
+    filename: "phocas-phlag.bundle.js",
     iife: true,
   },
   module: {

@@ -42,7 +42,7 @@ const userScriptBanner = createUserScriptBanner(
 const filepath = path.resolve(
   __dirname,
   "dist",
-  "phocas-power-search.bundle.js"
+  "phocas-phlag.bundle.js"
 );
 const content = fs.readFileSync(filepath);
 fs.writeFileSync(filepath, userScriptBanner + "\n\n" + content);
