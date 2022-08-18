@@ -9,6 +9,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "file-loader": "^6.2.0",
     "style-loader": "^3.3.0"
   },
   "scripts": {

@@ -12,20 +12,21 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
 
   createPhlagDialog() {
     const div = document.createElement("div");
-    div.id = "ppt-search-container";
+    div.id = "phlag-container";
     div.innerHTML = `
-		<div>
-      <span id='ppt-search-message' style='display: none'></span>
-			<ul id='ppt-search-results'>
-			</ul>
-		</div>
+		<div id="phlag">
+    <div id="phlag-header">
+        <div id="phlag-image">
+            <img src="phlag_logo.png" alt="phlagLogo">
+        </div>
+    </div>
 		`;
     return div;
   }
 
   createOverlay = () => {
     const overlay = document.createElement("div");
-    overlay.id = "ppt-search-overlay";
+    overlay.id = "phlag-overlay";
     overlay.innerHTML = `<style>${css.toString()}</style>`;
     return overlay;
   };
@@ -56,6 +57,8 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
 
       document.body.appendChild(this.overlay);
       document.body.appendChild(this.phlagDialog);
+
+      document.addEventListener("keydown", this.closeOverlayKeyDownHandler);
 
       this.hidden = false;
 
@@ -96,6 +99,7 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
         this.phlagDialog.style.opacity = "0";
       }
       setTimeout(() => {
+        console.log("gonna try removing");
         this.overlay?.parentNode?.removeChild(this.overlay);
         this.phlagDialog?.parentNode?.removeChild(this.phlagDialog);
         resolve();
@@ -105,11 +109,7 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
 
   public attachEventHandler() {
     document.body.addEventListener("keydown", (ev) => {
-      if (
-        ev.key === "/" &&
-        !["TEXTAREA", "INPUT"].includes((ev?.target as HTMLElement).nodeName) &&
-        !(ev?.target as HTMLElement).isContentEditable
-      ) {
+      if (ev.key === "/") {
         if (this.show()) {
           ev.preventDefault();
         }
