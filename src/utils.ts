@@ -1,6 +1,3 @@
-import { ISearchContext, SearchTermLoadType } from "./types";
-import SearchTerm from "./SearchTerm";
-
 interface Phocas {
   get: (url: string, data: any, callback: (res: any) => void) => void;
 }
@@ -11,20 +8,6 @@ declare global {
   }
 }
 
-interface SearchTermType {
-  type: string;
-  url_template: string;
-}
-
-const createSearchTermType = (
-  type: string,
-  url_template: string
-): SearchTermType => ({ type, url_template });
-
-const setImmediate = (fn: () => any) => {
-  setTimeout(fn, 0);
-};
-
 const get = (url: string): Promise<any> => {
   return new Promise((resolve, reject) => {
     const req = new XMLHttpRequest();
@@ -33,8 +16,7 @@ const get = (url: string): Promise<any> => {
         try {
           const json = JSON.parse(this.responseText);
           resolve(json);
-        }
-        catch (_) {
+        } catch (_) {
           reject(this.statusText);
         }
       } else {
@@ -50,65 +32,11 @@ const get = (url: string): Promise<any> => {
   });
 };
 
-const capitalise = (s: string) => {
-  if (s.length === 0) {
-    return "";
-  }
-  if (s.length === 1) {
-    return s.toUpperCase();
-  }
-  return s[0].toUpperCase() + s.substr(1);
-};
-
-const capitaliseWords = (s: string) => {
-  return s.split(" ").map(capitalise).join(" ");
-};
-
-const createDynamicLoader = (
-  api_url: string,
-  id_key: string,
-  name_key: string,
-  ...types: SearchTermType[]
-) => {
-  return async () => {
-    try {
-      const xs = (await get(api_url)) as object[];
-      const terms = xs
-        .map((x: { [key: string]: any }) => {
-          const value = x[name_key] ?? "";
-          const id = x[id_key];
-          return types.map((searchTermType) => {
-            const url = searchTermType.url_template.replace("?", id);
-            return SearchTerm.fromUrl(
-              value,
-              searchTermType.type,
-              SearchTermLoadType.Dynamic,
-              url
-            );
-          });
-        })
-        .flat();
-      return terms;
-    } catch {
-      // console.warn(err);
-      return [];
-    }
-  };
-};
-
-const createStaticMenuItem = (name: string, url: string) => {
-  return SearchTerm.fromUrl(name, "menu", SearchTermLoadType.Static, url);
-};
-
 const isEnvironmentConsole = () => {
   return location.hostname.split(".")[0].startsWith("console");
 };
 
-const shouldPowerSearchStart = async (ctx: ISearchContext) => {
-  if (await ctx.storageProvider.get("ppt-search-disable")) {
-    // Power Search has been intentionally disabled
-    return false;
-  }
+const shouldPowerSearchStart = async () => {
   if (location.pathname === "localhost" && location.port !== "8080") {
     // we are in localhost but our port is not 8080
     return false;
@@ -124,13 +52,4 @@ const shouldPowerSearchStart = async (ctx: ISearchContext) => {
   return true;
 };
 
-export {
-  isEnvironmentConsole,
-  capitalise,
-  capitaliseWords,
-  createDynamicLoader,
-  createStaticMenuItem,
-  setImmediate,
-  shouldPowerSearchStart,
-  createSearchTermType,
-};
+export { isEnvironmentConsole, shouldPowerSearchStart };
