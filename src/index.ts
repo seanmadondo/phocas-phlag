@@ -2,6 +2,7 @@ const css = require("./style.css");
 import { shouldPowerSearchStart } from "./utils";
 
 import { ISearchContext, ISearchUserInterface } from "./types";
+const logo = require("./assets/phlag_logo.png");
 
 const OPACITY_DURATION_MILLIS = 200;
 
@@ -17,7 +18,8 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
 		<div id="phlag">
     <div id="phlag-header">
         <div id="phlag-image">
-            <img src="phlag_logo.png" alt="phlagLogo">
+        <img src=${logo} alt='logo'>
+        Welcome to Phlag
         </div>
     </div>
 		`;
@@ -109,7 +111,7 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
 
   public attachEventHandler() {
     document.body.addEventListener("keydown", (ev) => {
-      if (ev.key === "/") {
+      if (ev.altKey && ev.key === "p") {
         if (this.show()) {
           ev.preventDefault();
         }

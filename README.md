@@ -1,4 +1,4 @@
-![Phocas Power Search](./phlag_logo.png)
+![Phocas Phlag](./phlag_logo.png)
 
 More ~~propaganda~~ information about this can be found at [https://helpphocassoftware.atlassian.net/wiki/spaces/~752526820/pages/2857042010/Phlag+-+A+Feature+Flag+tool+for+Phocas](https://helpphocassoftware.atlassian.net/wiki/spaces/~752526820/pages/2857042010/Phlag+-+A+Feature+Flag+tool+for+Phocas).
 

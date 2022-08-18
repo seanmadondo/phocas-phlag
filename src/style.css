@@ -26,11 +26,12 @@
 
 /* Style all immediate children of phlag-container that are a div */
 #phlag-container > div {
+  padding: 20px;
   width: 600px;
   height: 600px;
   margin: auto;
   border: 2px solid whitesmoke;
-  border-radius: 15%;
+  border-radius: 25px;
   background-color: whitesmoke;
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }

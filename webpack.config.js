@@ -15,12 +15,10 @@ module.exports = {
       },
       { test: /\.ts$/, use: "ts-loader" },
       {
-        test: /\.(png|jpe?g|gif)$/i,
+        test: /\.(png|svg|jpg|jpeg|gif|tiff)$/,
         use: [
-          {
-            loader: 'file-loader',
-          },
-        ],
+          'file-loader?name=assets/[name].[ext]'
+      ],
       }
     ],
   },
