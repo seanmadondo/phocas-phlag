@@ -8,6 +8,10 @@ declare global {
   }
 }
 
+export const getBaseUrl = () => {
+  return location.hostname;
+};
+
 const get = (url: string): Promise<any> => {
   return new Promise((resolve, reject) => {
     const req = new XMLHttpRequest();
@@ -36,7 +40,7 @@ const isEnvironmentConsole = () => {
   return location.hostname.split(".")[0].startsWith("console");
 };
 
-const shouldPowerSearchStart = async () => {
+const shouldPhlagStart = async () => {
   if (location.pathname === "localhost" && location.port !== "8080") {
     // we are in localhost but our port is not 8080
     return false;
@@ -52,4 +56,4 @@ const shouldPowerSearchStart = async () => {
   return true;
 };
 
-export { isEnvironmentConsole, shouldPowerSearchStart };
+export { isEnvironmentConsole, shouldPhlagStart };

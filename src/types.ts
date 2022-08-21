@@ -1,6 +1,4 @@
-export interface ISearchContext {
-  loadSearchTerms: () => Promise<void>;
-}
+export interface ISearchContext {}
 
 export interface ISearchUserInterface {
   hide: () => boolean;

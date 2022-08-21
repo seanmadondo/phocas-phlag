@@ -36,3 +36,40 @@
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
+#phlag-header {
+  font-size: 35px;
+  padding-bottom: 10px
+}
+
+#tab-menu {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  border-bottom: 1px solid gray;
+}
+
+.button tab-menu {
+  border: none;
+  size: 25px
+}
+
+#flag-container {
+  display: flex;
+  flex-direction: column;
+  overflow: scroll;
+  height: 450px;
+  padding-top: 20px;
+}
+
+.flag-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 8px 8px;
+  border-bottom: 1px solid #D3D3D3;
+}
+
+.flag-title {
+  font-size: 20px;
+}

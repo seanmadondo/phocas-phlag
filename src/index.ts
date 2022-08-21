@@ -1,8 +1,8 @@
 const css = require("./style.css");
-import { shouldPowerSearchStart } from "./utils";
+import { shouldPhlagStart, getBaseUrl } from "./utils";
 
 import { ISearchContext, ISearchUserInterface } from "./types";
-const logo = require("./assets/phlag_logo.png");
+// const logo = require("./assets/phlag_logo.png");
 
 const OPACITY_DURATION_MILLIS = 200;
 
@@ -16,11 +16,12 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
     div.id = "phlag-container";
     div.innerHTML = `
 		<div id="phlag">
-    <div id="phlag-header">
-        <div id="phlag-image">
-        <img src=${logo} alt='logo'>
-        Welcome to Phlag
-        </div>
+    <div id="phlag-header">Phlag</div>
+    <div id="tab-menu">
+      <button class="tablink">Global</button>
+      <button class="tablink">User</button>
+    </div>
+    <div id="flag-container"></div>
     </div>
 		`;
     return div;
@@ -32,12 +33,6 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
     overlay.innerHTML = `<style>${css.toString()}</style>`;
     return overlay;
   };
-
-  getResultsList = () => {
-    return document.getElementById("ppt-search-results") as HTMLDivElement;
-  };
-
-  async loadSearchTerms() {}
 
   closeOverlayKeyDownHandler = (ev: KeyboardEvent) => {
     if (ev.key === "Escape") {
@@ -80,6 +75,42 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
     return false;
   }
 
+  async getGlobalFlags() {
+    const response = await fetch(
+      "http://localhost:8080/Administration/SystemSettings/Grid",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          keysOnly: false,
+          pageIndex: 0,
+          sortColumn: "",
+          sortDescending: false,
+        }),
+      }
+    );
+    return response.json();
+  }
+
+  async showGlobaFlags() {
+    let data = await this.getGlobalFlags();
+    let flagsList = data.Rows;
+    let flagContainerDiv = document.getElementById("flag-container");
+    let childNode = document.createElement("div");
+
+    flagsList.map((setting: any) => {
+      if (setting.Values.Value === "true" || setting.Values.Value === "false") {
+        childNode.innerHTML += `<div class='flag-row'>
+          <div class='flag-title'> ${setting.Values.Name} </div>
+          <div>${setting.Values.Value}</div>
+        </div>`;
+        flagContainerDiv?.appendChild(childNode);
+      }
+    });
+  }
+
   private fadeIn() {
     return new Promise<void>((resolve) => {
       if (this.overlay) {
@@ -101,7 +132,6 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
         this.phlagDialog.style.opacity = "0";
       }
       setTimeout(() => {
-        console.log("gonna try removing");
         this.overlay?.parentNode?.removeChild(this.overlay);
         this.phlagDialog?.parentNode?.removeChild(this.phlagDialog);
         resolve();
@@ -110,11 +140,12 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
   }
 
   public attachEventHandler() {
-    document.body.addEventListener("keydown", (ev) => {
+    document.body.addEventListener("keydown", async (ev) => {
       if (ev.altKey && ev.key === "p") {
         if (this.show()) {
           ev.preventDefault();
         }
+        await this.showGlobaFlags();
       }
     });
   }
@@ -122,9 +153,8 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
 
 async function main() {
   const phlag = new PhocasPhlag();
-  if (await shouldPowerSearchStart()) {
+  if (await shouldPhlagStart()) {
     phlag.attachEventHandler();
-    phlag.loadSearchTerms();
   }
 }
 

@@ -36,7 +36,8 @@ const userScriptBanner = createUserScriptBanner(
 	  "https://*.epicoranalytics.com.au/*",
     "https://*.epicoranalytics.co.uk/*",
   ],
-  "phocassoftware.com"
+  "phocassoftware.com",
+  "demo.phocassoftware.com"
 );
 
 const filepath = path.resolve(
