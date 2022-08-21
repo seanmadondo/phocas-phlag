@@ -9,7 +9,11 @@ declare global {
 }
 
 export const getBaseUrl = () => {
-  return location.hostname;
+  if (location.hostname === "localhost") {
+    return `http://${location.host}`;
+  } else {
+    return `https://${location.host}`;
+  }
 };
 
 const get = (url: string): Promise<any> => {
@@ -41,6 +45,11 @@ const isEnvironmentConsole = () => {
 };
 
 const shouldPhlagStart = async () => {
+  if (isEnvironmentConsole()) {
+    // we don't want this working in console
+    return false;
+  }
+
   if (location.pathname === "localhost" && location.port !== "8080") {
     // we are in localhost but our port is not 8080
     return false;

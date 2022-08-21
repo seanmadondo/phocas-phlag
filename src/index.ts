@@ -17,10 +17,6 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
     div.innerHTML = `
 		<div id="phlag">
     <div id="phlag-header">Phlag</div>
-    <div id="tab-menu">
-      <button class="tablink">Global</button>
-      <button class="tablink">User</button>
-    </div>
     <div id="flag-container"></div>
     </div>
 		`;
@@ -77,7 +73,7 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
 
   async getGlobalFlags() {
     const response = await fetch(
-      "http://localhost:8080/Administration/SystemSettings/Grid",
+      `${getBaseUrl()}/Administration/SystemSettings/Grid`,
       {
         method: "POST",
         headers: {
@@ -94,6 +90,16 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
     return response.json();
   }
 
+  sanitizeString(str: string) {
+    if (str === null || str === "") return false;
+    else str = str.toString();
+
+    // Regular expression to identify HTML tags in
+    // the input string. Replacing the identified
+    // HTML tag with a null string.
+    return str.replace(/(<([^>]+)>)/gi, "");
+  }
+
   async showGlobaFlags() {
     let data = await this.getGlobalFlags();
     let flagsList = data.Rows;
@@ -103,14 +109,19 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
     flagsList.map((setting: any) => {
       if (setting.Values.Value === "true" || setting.Values.Value === "false") {
         childNode.innerHTML += `<div class='flag-row'>
-          <div class='flag-title'> ${setting.Values.Name} </div>
-          <div>${setting.Values.Value}</div>
+          <div class='flag-title'>${this.sanitizeString(
+            setting.Values.Name
+          )} </div>
+          <div>
+          <input type="checkbox" id="switch" /><label for="switch">Toggle</label>
+          </div>
         </div>`;
         flagContainerDiv?.appendChild(childNode);
       }
     });
   }
 
+  // <div>${setting.Values.Value}</div>
   private fadeIn() {
     return new Promise<void>((resolve) => {
       if (this.overlay) {
