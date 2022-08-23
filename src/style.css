@@ -38,7 +38,7 @@
 }
 
 #phlag-header {
-  font-size: 35px;
+  font-size: 15px;
   font-weight: bold;
 }
 
@@ -105,7 +105,7 @@ label:after {
 }
 
 input:checked + label {
-  background: #bada55;
+  background: #11BA99;
 }
 
 input:checked + label:after {

@@ -26,4 +26,7 @@ This will use WebPack to bundle the source and apply the UserScript header to th
 
 - [x] MVP
 - [x] Convert to TypeScript
-- [x] Phlag overlay will fade in
+- [x] Phlag overlay will fade in on ALT + P
+- [x] Phlag overlay will fade out on ALT + P
+- [x] Ensure input HTML is not overriden
+- [x] Ensure stable

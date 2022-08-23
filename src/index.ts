@@ -2,9 +2,10 @@ const css = require("./style.css");
 import { shouldPhlagStart, getBaseUrl } from "./utils";
 
 import { ISearchContext, ISearchUserInterface } from "./types";
-// const logo = require("./assets/phlag_logo.png");
 
 const OPACITY_DURATION_MILLIS = 200;
+const Phocas_Features_Link =
+  "https://helpphocassoftware.atlassian.net/wiki/spaces/DEV/pages/983663895/Feature+Flags?src=search";
 
 class PhocasPhlag implements ISearchUserInterface, ISearchContext {
   hidden = true;
@@ -16,7 +17,7 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
     div.id = "phlag-container";
     div.innerHTML = `
 		<div id="phlag">
-    <div id="phlag-header">Phlag</div>
+    <a target="_blank" href="${Phocas_Features_Link}" id="phlag-header">Go to feature flag documentation...</a>
     <div id="flag-container"></div>
     </div>
 		`;
@@ -90,6 +91,27 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
     return response.json();
   }
 
+  async toggleFlag(id: number, featureName: string, value: string) {
+    // let valueState: boolean = false;
+    // if (value === "true") {
+    //   valueState = true;
+    // } else {
+    //   valueState = false;
+    // }
+    // const response = await fetch(`${getBaseUrl()}/api/settings/${id}`, {
+    //   method: "PUT",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     name: `${featureName}`,
+    //     value: valueState,
+    //   }),
+    // });
+
+    console.log("wooow");
+  }
+
   sanitizeString(str: string) {
     if (str === null || str === "") return false;
     else str = str.toString();
@@ -108,14 +130,22 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
 
     flagsList.map((setting: any) => {
       if (setting.Values.Value === "true" || setting.Values.Value === "false") {
+        console.log(setting);
         childNode.innerHTML += `<div class='flag-row'>
           <div class='flag-title'>${this.sanitizeString(
             setting.Values.Name
           )} </div>
           <div>
-          <input type="checkbox" id="switch" /><label for="switch">Toggle</label>
+          <input type="checkbox" id="flag-${setting.Key}" ${
+          setting.Values.Value === "true" && "checked"
+        } onClick={${this.toggleFlag(
+          setting.Key,
+          setting.Values.Name,
+          setting.Values.Value
+        )}}/><label for="flag-${setting.Key}" id="flag-${setting.Key}"></label>
           </div>
         </div>`;
+
         flagContainerDiv?.appendChild(childNode);
       }
     });
