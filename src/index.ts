@@ -11,6 +11,7 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
   hidden = true;
   overlay: HTMLDivElement | null = null;
   phlagDialog: HTMLDivElement | null = null;
+  isDomLoaded: boolean = false;
 
   createPhlagDialog() {
     const div = document.createElement("div");
@@ -91,25 +92,24 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
     return response.json();
   }
 
-  async toggleFlag(id: number, featureName: string, value: string) {
-    // let valueState: boolean = false;
-    // if (value === "true") {
-    //   valueState = true;
-    // } else {
-    //   valueState = false;
-    // }
-    // const response = await fetch(`${getBaseUrl()}/api/settings/${id}`, {
-    //   method: "PUT",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     name: `${featureName}`,
-    //     value: valueState,
-    //   }),
-    // });
-
-    console.log("wooow");
+  async toggleFlag(id: number, value: string, featureName: string) {
+    let valueState: boolean = false;
+    if (value.toLocaleLowerCase() === "true") {
+      valueState = false;
+    } else {
+      valueState = true;
+    }
+    const response = await fetch(`${getBaseUrl()}/api/settings/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: `${this.sanitizeString(featureName)}`,
+        value: valueState,
+      }),
+    });
+    window.location.reload();
   }
 
   sanitizeString(str: string) {
@@ -126,32 +126,51 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
     let data = await this.getGlobalFlags();
     let flagsList = data.Rows;
     let flagContainerDiv = document.getElementById("flag-container");
-    let childNode = document.createElement("div");
+
+    if (this.isDomLoaded) {
+      return;
+    }
 
     flagsList.map((setting: any) => {
-      if (setting.Values.Value === "true" || setting.Values.Value === "false") {
-        console.log(setting);
-        childNode.innerHTML += `<div class='flag-row'>
+      if (
+        setting.Values.Value.toLowerCase() === "true" ||
+        setting.Values.Value.toLowerCase() === "false"
+      ) {
+        let flagRow = `<div class='flag-row'>
           <div class='flag-title'>${this.sanitizeString(
             setting.Values.Name
           )} </div>
           <div>
-          <input type="checkbox" id="flag-${setting.Key}" ${
-          setting.Values.Value === "true" && "checked"
-        } onClick={${this.toggleFlag(
-          setting.Key,
-          setting.Values.Name,
-          setting.Values.Value
-        )}}/><label for="flag-${setting.Key}" id="flag-${setting.Key}"></label>
+          <input type="checkbox" class="flagCheckbox" id="flag-${
+            setting.Key
+          }" ${
+          setting.Values.Value.toLowerCase() === "true" && "checked"
+        }></input><label class="flagCheckboxLabel" for="flag-${
+          setting.Key
+        }" id="label-flag-${setting.Key}"></label>
           </div>
         </div>`;
 
-        flagContainerDiv?.appendChild(childNode);
+        // Add to our flag container div
+        flagContainerDiv?.insertAdjacentHTML("beforeend", flagRow);
+
+        // add click event listener for each element
+        document
+          .querySelector(`input[id="flag-${setting.Key}"]`)
+          ?.addEventListener("change", () => {
+            this.toggleFlag(
+              setting.Key,
+              setting.Values.Value,
+              setting.Values.Name
+            );
+          });
+
+        // we now have data in the DOM - prevent newer calls
+        this.isDomLoaded = true;
       }
     });
   }
 
-  // <div>${setting.Values.Value}</div>
   private fadeIn() {
     return new Promise<void>((resolve) => {
       if (this.overlay) {

@@ -42,21 +42,13 @@
   font-weight: bold;
 }
 
-#tab-menu {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  border-bottom: 1px solid gray;
-}
-
 #flag-container {
   display: flex;
   flex-direction: column;
+  padding-top: 40px;
   overflow-y: scroll;
   overflow-x: hidden;
-  height: 480px;
-  padding-top: 20px;
+  height: 510px;
 }
 
 .flag-row {
@@ -75,13 +67,13 @@
 }
 
 /* ---------- Toggle button ---------- */
-input[type=checkbox]{
+.flagCheckbox {
   height: 0;
   width: 0;
   visibility: hidden;
 }
 
-label {
+.flagCheckboxLabel {
   cursor: pointer;
   text-indent: -999px;
   width: 60px;
@@ -92,7 +84,7 @@ label {
   position: relative;
 }
 
-label:after {
+.flagCheckboxLabel:after {
   content: '';
   position: absolute;
   top: 5px;
@@ -104,16 +96,16 @@ label:after {
   transition: 0.3s;
 }
 
-input:checked + label {
-  background: #11BA99;
+.flagCheckbox:checked + .flagCheckboxLabel {
+  background: #5DD2EB;
 }
 
-input:checked + label:after {
+.flagCheckbox:checked + .flagCheckboxLabel:after {
   left: calc(100% - 5px);
   transform: translateX(-100%);
 }
 
-label:active:after {
+.flagCheckboxLabel:active:after {
   width: 40px;
 }
 
