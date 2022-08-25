@@ -7,6 +7,9 @@ const OPACITY_DURATION_MILLIS = 200;
 const Phocas_Features_Link =
   "https://helpphocassoftware.atlassian.net/wiki/spaces/DEV/pages/983663895/Feature+Flags?src=search";
 
+const PhlagDocoLink =
+  "https://helpphocassoftware.atlassian.net/wiki/spaces/~752526820/pages/2857042010/Phlag+-+A+Feature+Flag+tool+for+Phocas";
+
 class PhocasPhlag implements ISearchUserInterface, ISearchContext {
   hidden = true;
   overlay: HTMLDivElement | null = null;
@@ -20,6 +23,10 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
 		<div id="phlag">
     <a target="_blank" href="${Phocas_Features_Link}" id="phlag-header">Go to feature flag documentation...</a>
     <div id="flag-container"></div>
+    <div id="flag-footer">
+      <a target="_blank" href="${PhlagDocoLink}" >Version 1.0</a>
+      <button id="beta-button" class="disabled">BETA</button>
+    </div>
     </div>
 		`;
     return div;

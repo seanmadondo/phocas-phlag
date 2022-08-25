@@ -45,11 +45,23 @@
 #flag-container {
   display: flex;
   flex-direction: column;
-  padding-top: 40px;
+  margin-top: 10px;
   overflow-y: scroll;
   overflow-x: hidden;
   height: 510px;
+  border-top: 1px solid #D3D3D3;
 }
+
+#flag-container::-webkit-scrollbar {
+  width: 6px;
+  background-color: none;
+}
+
+#flag-container::-webkit-scrollbar-thumb {
+  background-color: #B5B6B6;
+  border-radius: 10px;
+}
+
 
 .flag-row {
   display: flex;
@@ -64,6 +76,23 @@
   font-size: 15px;
   text-decoration: none;
   color: inherit;
+}
+
+#flag-footer {
+  display: flex;
+  flex-direction: row-reverse;
+  border-top: 1px solid #D3D3D3;
+  padding-top: 10px;
+}
+
+#beta-button {
+  border: none;
+  background-color: #F36F31;
+  color: #FFFFFF;
+  padding: 0px 10px;
+  font-weight: 300;
+  border-radius: 20px;
+  margin-right: 5px;
 }
 
 /* ---------- Toggle button ---------- */
