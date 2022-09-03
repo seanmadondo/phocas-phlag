@@ -16,29 +16,15 @@ export const getBaseUrl = () => {
   }
 };
 
-const get = (url: string): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    const req = new XMLHttpRequest();
-    req.addEventListener("load", function () {
-      if (this.status >= 200 && this.status < 400) {
-        try {
-          const json = JSON.parse(this.responseText);
-          resolve(json);
-        } catch (_) {
-          reject(this.statusText);
-        }
-      } else {
-        reject(this.statusText);
-      }
-    });
-    req.addEventListener("error", function () {
-      reject(this.statusText);
-    });
-    req.open("GET", url);
-    req.setRequestHeader("Accept", "application/json");
-    req.send();
-  });
-};
+export function sanitizeString(str: string) {
+  if (str === null || str === "") return false;
+  else str = str.toString();
+
+  // Regular expression to identify HTML tags in
+  // the input string. Replacing the identified
+  // HTML tag with a null string.
+  return str.replace(/(<([^>]+)>)/gi, "");
+}
 
 const isEnvironmentConsole = () => {
   return location.hostname.split(".")[0].startsWith("console");
@@ -46,7 +32,7 @@ const isEnvironmentConsole = () => {
 
 const shouldPhlagStart = async () => {
   if (isEnvironmentConsole()) {
-    // we don't want this working in console
+    // we don't want this working in console for now
     return false;
   }
 

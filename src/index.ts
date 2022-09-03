@@ -1,16 +1,14 @@
 const css = require("./style.css");
-import { shouldPhlagStart, getBaseUrl } from "./utils";
+import { shouldPhlagStart, getBaseUrl, sanitizeString } from "./utils";
+import {
+  OPACITY_DURATION_MILLIS,
+  Phocas_Features_Link,
+  PhlagDocoLink,
+} from "./constants";
 
-import { ISearchContext, ISearchUserInterface } from "./types";
+import { FlagUserInterface } from "./types";
 
-const OPACITY_DURATION_MILLIS = 200;
-const Phocas_Features_Link =
-  "https://helpphocassoftware.atlassian.net/wiki/spaces/DEV/pages/983663895/Feature+Flags?src=search";
-
-const PhlagDocoLink =
-  "https://helpphocassoftware.atlassian.net/wiki/spaces/~752526820/pages/2857042010/Phlag+-+A+Feature+Flag+tool+for+Phocas";
-
-class PhocasPhlag implements ISearchUserInterface, ISearchContext {
+class PhocasPhlag implements FlagUserInterface {
   hidden = true;
   overlay: HTMLDivElement | null = null;
   phlagDialog: HTMLDivElement | null = null;
@@ -24,7 +22,7 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
     <a target="_blank" href="${Phocas_Features_Link}" id="phlag-header">Go to feature flag documentation...</a>
     <div id="flag-container"></div>
     <div id="flag-footer">
-      <a target="_blank" href="${PhlagDocoLink}" >Version 1.0</a>
+      <a target="_blank" href="${PhlagDocoLink}" >Version 1.1</a>
       <button id="beta-button" class="disabled">BETA</button>
     </div>
     </div>
@@ -80,7 +78,7 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
     return false;
   }
 
-  async getGlobalFlags() {
+  async loadGlobalFlags() {
     const response = await fetch(
       `${getBaseUrl()}/Administration/SystemSettings/Grid`,
       {
@@ -106,47 +104,37 @@ class PhocasPhlag implements ISearchUserInterface, ISearchContext {
     } else {
       valueState = true;
     }
-    const response = await fetch(`${getBaseUrl()}/api/settings/${id}`, {
+    await fetch(`${getBaseUrl()}/api/settings/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        name: `${this.sanitizeString(featureName)}`,
+        name: `${sanitizeString(featureName)}`,
         value: valueState,
       }),
     });
+
     window.location.reload();
   }
 
-  sanitizeString(str: string) {
-    if (str === null || str === "") return false;
-    else str = str.toString();
-
-    // Regular expression to identify HTML tags in
-    // the input string. Replacing the identified
-    // HTML tag with a null string.
-    return str.replace(/(<([^>]+)>)/gi, "");
-  }
-
   async showGlobaFlags() {
-    let data = await this.getGlobalFlags();
-    let flagsList = data.Rows;
-    let flagContainerDiv = document.getElementById("flag-container");
-
     if (this.isDomLoaded) {
       return;
     }
+
+    const data = await this.loadGlobalFlags();
+    let flagsList = data.Rows;
+    let flagContainerDiv = document.getElementById("flag-container");
 
     flagsList.map((setting: any) => {
       if (
         setting.Values.Value.toLowerCase() === "true" ||
         setting.Values.Value.toLowerCase() === "false"
       ) {
+        // Build the row and set the boolean
         let flagRow = `<div class='flag-row'>
-          <div class='flag-title'>${this.sanitizeString(
-            setting.Values.Name
-          )} </div>
+          <div class='flag-title'>${sanitizeString(setting.Values.Name)} </div>
           <div>
           <input type="checkbox" class="flagCheckbox" id="flag-${
             setting.Key

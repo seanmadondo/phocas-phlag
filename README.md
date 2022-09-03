@@ -25,8 +25,9 @@ This will use WebPack to bundle the source and apply the UserScript header to th
 ## Feature List
 
 - [x] MVP
-- [x] Convert to TypeScript
 - [x] Phlag overlay will fade in on ALT + P
-- [x] Phlag overlay will fade out on ALT + P
-- [x] Ensure input HTML is not overriden
-- [x] Ensure stable
+- [x] Phlag overlay will fade out on ESC
+- [x] Ensure correct API calls are made to administration settings
+- [x] Ensure no duplication of API calls
+- [x] Ensure global access across Phocas when user is logged in
+- [x] Exclude Phocas Console
