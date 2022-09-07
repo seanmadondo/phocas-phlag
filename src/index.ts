@@ -8,6 +8,8 @@ import {
 
 import { FlagUserInterface } from "./types";
 
+const Feature_NextGenQueryOptions = ["None", "Verify", "ClassicFallback"];
+
 class PhocasPhlag implements FlagUserInterface {
   hidden = true;
   overlay: HTMLDivElement | null = null;
@@ -135,7 +137,6 @@ class PhocasPhlag implements FlagUserInterface {
         // Build the row and set the boolean
         let flagRow = `<div class='flag-row'>
           <div class='flag-title'>${sanitizeString(setting.Values.Name)} </div>
-          <div>
           <input type="checkbox" class="flagCheckbox" id="flag-${
             setting.Key
           }" ${
@@ -143,7 +144,6 @@ class PhocasPhlag implements FlagUserInterface {
         }></input><label class="flagCheckboxLabel" for="flag-${
           setting.Key
         }" id="label-flag-${setting.Key}"></label>
-          </div>
         </div>`;
 
         // Add to our flag container div
@@ -159,10 +159,29 @@ class PhocasPhlag implements FlagUserInterface {
               setting.Values.Name
             );
           });
-
-        // we now have data in the DOM - prevent newer calls
-        this.isDomLoaded = true;
       }
+
+      if (setting.Values.Name.includes("NextGen")) {
+        // Build the row and set the string values
+        let flagRow = `<div class='flag-row'>
+          <div class='flag-title'>${sanitizeString(setting.Values.Name)} </div>
+          <div>
+            <select name="feature-select" id="feature-select">
+            ${Feature_NextGenQueryOptions.map((option: string) => {
+              let optionElement = `<option value="${option}">${option}</option>`;
+              console.log(optionElement);
+              document.getElementById("feature-select")?.append(optionElement);
+            })}
+            </select>
+          </div>
+        </div>`;
+
+        // Add to our flag container div
+        flagContainerDiv?.insertAdjacentHTML("beforeend", flagRow);
+      }
+
+      // we now have data in the DOM - prevent newer calls
+      this.isDomLoaded = true;
     });
   }
 
@@ -214,3 +233,13 @@ async function main() {
 }
 
 main();
+
+/* 
+<input type="checkbox" class="flagCheckbox" id="flag-${
+            setting.Key
+          }" ${
+          setting.Values.Value.toLowerCase() === "true" && "checked"
+        }></input><label class="flagCheckboxLabel" for="flag-${
+          setting.Key
+        }" id="label-flag-${setting.Key}"></label>
+*/
