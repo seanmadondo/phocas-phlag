@@ -29,6 +29,7 @@ This will use WebPack to bundle the source and apply the UserScript header to th
 - [x] Phlag overlay will fade out on ESC
 - [x] Phlag overlay will fade out on Feature selection
 - [x] Gets flags via global administration settings API
-- [x] Ensure no duplication of API calls
 - [x] Ensure global access across Phocas when user is logged in
 - [x] Exclude Phocas Console
+- [x] Show toggle for boolean type feature flags
+- [x] Shows dropdown for multi string option feature flags\*
