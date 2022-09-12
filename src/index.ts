@@ -7,8 +7,7 @@ import {
 } from "./constants";
 
 import { FlagUserInterface } from "./types";
-
-const Feature_NextGenQueryOptions = ["None", "Verify", "ClassicFallback"];
+import { getFeatureFlagOptions, MultiValueFeatures } from "./features";
 
 class PhocasPhlag implements FlagUserInterface {
   hidden = true;
@@ -24,7 +23,7 @@ class PhocasPhlag implements FlagUserInterface {
     <a target="_blank" href="${Phocas_Features_Link}" id="phlag-header">Go to feature flag documentation...</a>
     <div id="flag-container"></div>
     <div id="flag-footer">
-      <a target="_blank" href="${PhlagDocoLink}" >Version 1.1</a>
+      <a target="_blank" href="${PhlagDocoLink}" >Version 1.2.0</a>
       <button id="beta-button" class="disabled">BETA</button>
     </div>
     </div>
@@ -100,23 +99,32 @@ class PhocasPhlag implements FlagUserInterface {
   }
 
   async toggleFlag(id: number, value: string, featureName: string) {
-    let valueState: boolean = false;
-    if (value.toLocaleLowerCase() === "true") {
-      valueState = false;
+    let jsonBody = {};
+
+    if (Object.keys(MultiValueFeatures).includes(featureName)) {
+      // If we're working with string options...
+      jsonBody = { name: featureName, value: value };
     } else {
-      valueState = true;
+      // we're working with booleans
+      let valueState: boolean = false;
+      if (value.toLocaleLowerCase() === "true") {
+        valueState = false;
+      } else {
+        valueState = true;
+      }
+
+      jsonBody = { name: featureName, value: valueState };
     }
+
     await fetch(`${getBaseUrl()}/api/settings/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        name: `${sanitizeString(featureName)}`,
-        value: valueState,
-      }),
+      body: JSON.stringify(jsonBody),
     });
 
+    this.hide();
     window.location.reload();
   }
 
@@ -130,13 +138,14 @@ class PhocasPhlag implements FlagUserInterface {
     let flagContainerDiv = document.getElementById("flag-container");
 
     flagsList.map((setting: any) => {
+      const sanitizedFeatureName = sanitizeString(setting.Values.Name);
       if (
         setting.Values.Value.toLowerCase() === "true" ||
         setting.Values.Value.toLowerCase() === "false"
       ) {
         // Build the row and set the boolean
         let flagRow = `<div class='flag-row'>
-          <div class='flag-title'>${sanitizeString(setting.Values.Name)} </div>
+          <div class='flag-title'>${sanitizedFeatureName} </div>
           <input type="checkbox" class="flagCheckbox" id="flag-${
             setting.Key
           }" ${
@@ -156,31 +165,60 @@ class PhocasPhlag implements FlagUserInterface {
             this.toggleFlag(
               setting.Key,
               setting.Values.Value,
-              setting.Values.Name
+              sanitizedFeatureName
             );
           });
       }
 
-      if (setting.Values.Name.includes("NextGen")) {
+      //Build a row for features with string options
+      const isMultiValFeature =
+        Object.keys(MultiValueFeatures).includes(sanitizedFeatureName);
+      if (isMultiValFeature) {
         // Build the row and set the string values
         let flagRow = `<div class='flag-row'>
-          <div class='flag-title'>${sanitizeString(setting.Values.Name)} </div>
+          <div class='flag-title'>${sanitizedFeatureName} </div>
           <div>
-            <select name="feature-select" id="feature-select">
-            ${Feature_NextGenQueryOptions.map((option: string) => {
-              let optionElement = `<option value="${option}">${option}</option>`;
-              console.log(optionElement);
-              document.getElementById("feature-select")?.append(optionElement);
-            })}
+            <select class="feature-select" id="select-${setting.Key}">
             </select>
           </div>
         </div>`;
 
-        // Add to our flag container div
+        // Add row to our flag container div
         flagContainerDiv?.insertAdjacentHTML("beforeend", flagRow);
+
+        // Build the list of options and append to the row
+        getFeatureFlagOptions(sanitizedFeatureName).forEach((feature) => {
+          let optionElement = document.createElement("option");
+
+          // set the active option
+          if (setting.Values.Value === feature) {
+            optionElement.value = feature;
+            optionElement.text = feature;
+            optionElement.selected = true;
+          } else {
+            optionElement.value = feature;
+            optionElement.text = feature;
+          }
+
+          const selectDropdown = document.getElementById(
+            `select-${setting.Key}`
+          ) as HTMLSelectElement | null;
+
+          if (selectDropdown) {
+            // Add our options to the HTML select
+            selectDropdown.appendChild(optionElement);
+
+            // add click event listener for the select element
+            selectDropdown.addEventListener("change", () => {
+              const selectedValue =
+                selectDropdown?.options[selectDropdown.selectedIndex].value;
+              this.toggleFlag(setting.Key, selectedValue, sanitizedFeatureName);
+            });
+          }
+        });
       }
 
-      // we now have data in the DOM - prevent newer calls
+      // we now have data in the DOM for this page session - prevent newer API calls
       this.isDomLoaded = true;
     });
   }
@@ -233,13 +271,3 @@ async function main() {
 }
 
 main();
-
-/* 
-<input type="checkbox" class="flagCheckbox" id="flag-${
-            setting.Key
-          }" ${
-          setting.Values.Value.toLowerCase() === "true" && "checked"
-        }></input><label class="flagCheckboxLabel" for="flag-${
-          setting.Key
-        }" id="label-flag-${setting.Key}"></label>
-*/
