@@ -32,4 +32,4 @@ This will use WebPack to bundle the source and apply the UserScript header to th
 - [x] Ensure global access across Phocas when user is logged in
 - [x] Exclude Phocas Console
 - [x] Show toggle for boolean type feature flags
-- [x] Shows dropdown for multi string option feature flags\*
+- [x] Shows dropdown for multi string option feature flags
