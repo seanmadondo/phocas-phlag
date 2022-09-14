@@ -17,7 +17,7 @@ export const getBaseUrl = () => {
 };
 
 export function sanitizeString(str: string) {
-  if (str === null || str === "") return false;
+  if (str === null || str === "") return "";
   else str = str.toString();
 
   // Regular expression to identify HTML tags in
