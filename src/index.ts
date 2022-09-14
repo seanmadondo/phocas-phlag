@@ -6,7 +6,7 @@ import {
   PhlagDocoLink,
 } from "./constants";
 
-import { FlagUserInterface } from "./types";
+import { FeatureFlag, FlagUserInterface } from "./types";
 
 class PhocasPhlag implements FlagUserInterface {
   hidden = true;
@@ -97,52 +97,93 @@ class PhocasPhlag implements FlagUserInterface {
     return response.json();
   }
 
-  async toggleFlag(id: number, value: string, featureName: string) {
-    let valueState: boolean = false;
-    if (value.toLocaleLowerCase() === "true") {
-      valueState = false;
-    } else {
-      valueState = true;
-    }
-    await fetch(`${getBaseUrl()}/api/settings/${id}`, {
+  async loadFlagDefinitions(): Promise<FeatureFlag[]> {
+    const response = await fetch(`${getBaseUrl()}/api/settings/feature-flags`);
+    return response.json() as Promise<FeatureFlag[]>;
+  }
+
+  async fetchFlagDataInParallel(): Promise<[FeatureFlag[], any]> {
+    return Promise.all([this.loadFlagDefinitions(), this.loadGlobalFlags()])
+  }
+
+  updateFlag(id: number, name: string, value: string) {
+    return fetch(`${getBaseUrl()}/api/settings/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        name: `${sanitizeString(featureName)}`,
-        value: valueState,
+        name,
+        value,
       }),
     });
+  }
+
+  createFlag(name: string, value: string) {
+    return fetch(`${getBaseUrl()}/api/settings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        value
+      })
+    })
+  }
+
+  async toggleFlag(id: number | null, value: string, featureName: string) {
+    const newState = (value.toLocaleLowerCase() !== "true").toString();
+    
+    if (id === null) {
+      await this.createFlag(featureName, newState);
+    } else {
+      await this.updateFlag(id, featureName, newState);
+    }
 
     window.location.reload();
   }
 
-  async showGlobaFlags() {
+  static generateUniqueId() {
+    if (typeof(this.generateUniqueId.prototype.count) === 'undefined') {
+      this.generateUniqueId.prototype.count = 1;
+    }
+
+    return "new-" + (this.generateUniqueId.prototype.count++).toString();
+  }
+
+  async showGlobalFlags() {
     if (this.isDomLoaded) {
       return;
     }
 
-    const data = await this.loadGlobalFlags();
-    let flagsList = data.Rows;
-    let flagContainerDiv = document.getElementById("flag-container");
+    const [definitions, rawData] = await this.fetchFlagDataInParallel();
+    const flagContainerDiv = document.getElementById("flag-container");
 
-    flagsList.map((setting: any) => {
+    const data: { id: number, name: string, value: string }[] = rawData.Rows.map((setting: any) => ({
+      id: parseInt(setting.Values.ID),
+      name: sanitizeString(setting.Values.Name),
+      value: (() => { try { return JSON.parse(setting.Values.Value).toString(); } catch { return setting.Values.Value; }})()
+    }));
+
+    definitions.forEach((definition) => {
+      const setting = data.find(({name}) => definition.name === name) ?? null;
+      const value = setting === null ? definition.defaultValue === null ? false : JSON.parse(definition.defaultValue) : setting.value;
+      const inputId = setting?.id ?? PhocasPhlag.generateUniqueId();
+
+      console.log(definition.name, "Value is: \"" + value + "\"")
+      
       if (
-        setting.Values.Value.toLowerCase() === "true" ||
-        setting.Values.Value.toLowerCase() === "false"
+        value.toLowerCase() === "true" ||
+        value.toLowerCase() === "false"
       ) {
         // Build the row and set the boolean
-        let flagRow = `<div class='flag-row'>
-          <div class='flag-title'>${sanitizeString(setting.Values.Name)} </div>
+        const flagRow = `<div class='flag-row'>
+          <div class='flag-title'>${definition.displayName ?? definition.name}</div>
           <div>
-          <input type="checkbox" class="flagCheckbox" id="flag-${
-            setting.Key
-          }" ${
-          setting.Values.Value.toLowerCase() === "true" && "checked"
-        }></input><label class="flagCheckboxLabel" for="flag-${
-          setting.Key
-        }" id="label-flag-${setting.Key}"></label>
+          <input type="checkbox" class="flagCheckbox" id="flag-${inputId}" ${
+          value.toLowerCase() === "true" && "checked"
+        }></input><label class="flagCheckboxLabel" for="flag-${inputId}" id="label-flag-${inputId}"></label>
           </div>
         </div>`;
 
@@ -151,12 +192,12 @@ class PhocasPhlag implements FlagUserInterface {
 
         // add click event listener for each element
         document
-          .querySelector(`input[id="flag-${setting.Key}"]`)
+          .querySelector(`input[id="flag-${inputId}"]`)
           ?.addEventListener("change", () => {
             this.toggleFlag(
-              setting.Key,
-              setting.Values.Value,
-              setting.Values.Name
+              setting?.id ?? null,
+              value,
+              definition.name
             );
           });
 
@@ -200,7 +241,7 @@ class PhocasPhlag implements FlagUserInterface {
         if (this.show()) {
           ev.preventDefault();
         }
-        await this.showGlobaFlags();
+        await this.showGlobalFlags();
       }
     });
   }
