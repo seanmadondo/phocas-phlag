@@ -20,7 +20,7 @@ export type FeatureFlag = {
   owners: string[];
   scope: FeatureFlagScope | null;
   defaultValue: string | null;
-  possibleValues: string[];
+  possibleValues: string[] | null;
   helpUrl: string | null;
   obsoleteReason: string | null;
 }
