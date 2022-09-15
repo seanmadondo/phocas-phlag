@@ -7,6 +7,7 @@ import {
 } from "./constants";
 
 import { FeatureFlag, FlagUserInterface } from "./types";
+import { MultiValueFeatures } from "./features";
 
 class PhocasPhlag implements FlagUserInterface {
   hidden = true;
@@ -22,7 +23,7 @@ class PhocasPhlag implements FlagUserInterface {
     <a target="_blank" href="${Phocas_Features_Link}" id="phlag-header">Go to feature flag documentation...</a>
     <div id="flag-container"></div>
     <div id="flag-footer">
-      <a target="_blank" href="${PhlagDocoLink}" >Version 1.1</a>
+      <a target="_blank" href="${PhlagDocoLink}" >Version 1.2.0</a>
       <button id="beta-button" class="disabled">BETA</button>
     </div>
     </div>
@@ -96,7 +97,7 @@ class PhocasPhlag implements FlagUserInterface {
     );
     return response.json();
   }
-
+  
   async loadFlagDefinitions(): Promise<FeatureFlag[]> {
     const response = await fetch(`${getBaseUrl()}/api/settings/feature-flags`);
     return response.json() as Promise<FeatureFlag[]>;
@@ -106,20 +107,25 @@ class PhocasPhlag implements FlagUserInterface {
     return Promise.all([this.loadFlagDefinitions(), this.loadGlobalFlags()])
   }
 
-  updateFlag(id: number, name: string, value: string) {
-    return fetch(`${getBaseUrl()}/api/settings/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        value,
-      }),
-    });
+  async toggleFlag(id: number | null, value: string, featureName: string) {
+    let newValue: string | boolean;
+
+    if (Object.keys(MultiValueFeatures).includes(featureName)) {
+      // If we're working with string options...
+      newValue = value;
+    } else {
+      // we're working with booleans
+      newValue = !(value.toLocaleLowerCase() === "true")
+    }
+
+    if (id === null) {
+      this.createFlag(featureName, newValue);
+    } else {
+      this.updateFlag(id, featureName, newValue);
+    }
   }
 
-  createFlag(name: string, value: string) {
+  createFlag(name: string, value: string | boolean) {
     return fetch(`${getBaseUrl()}/api/settings`, {
       method: "POST",
       headers: {
@@ -132,16 +138,17 @@ class PhocasPhlag implements FlagUserInterface {
     })
   }
 
-  async toggleFlag(id: number | null, value: string, featureName: string) {
-    const newState = (value.toLocaleLowerCase() !== "true").toString();
-    
-    if (id === null) {
-      await this.createFlag(featureName, newState);
-    } else {
-      await this.updateFlag(id, featureName, newState);
-    }
-
-    window.location.reload();
+  updateFlag(id: number, name: string, value: string | boolean) {
+    return fetch(`${getBaseUrl()}/api/settings/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        value
+      })
+    });
   }
 
   static generateUniqueId() {
@@ -200,10 +207,56 @@ class PhocasPhlag implements FlagUserInterface {
               definition.name
             );
           });
-
-        // we now have data in the DOM - prevent newer calls
-        this.isDomLoaded = true;
       }
+
+      //Build a row for features with string options
+      const isMultiValFeature = definition.possibleValues !== null && definition.possibleValues.length > 0;
+        
+      if (isMultiValFeature) {
+        // Build the row and set the string values
+        let flagRow = `<div class='flag-row'>
+          <div class='flag-title'>${definition.name} </div>
+          <div>
+            <select class="feature-select" id="select-${inputId}">
+            </select>
+          </div>
+        </div>`;
+
+        // Add row to our flag container div
+        flagContainerDiv?.insertAdjacentHTML("beforeend", flagRow);
+
+        // Build the list of options and append to the row
+        definition.possibleValues?.forEach((possibleValue) => {
+          const optionElement = document.createElement("option");
+
+          optionElement.value = possibleValue;
+          optionElement.text = possibleValue;
+
+          // set the active option
+          if (value === possibleValue) {
+            optionElement.selected = true;
+          }
+
+          const selectDropdown = document.getElementById(
+            `select-${inputId}`
+          ) as HTMLSelectElement | null;
+
+          if (selectDropdown !== null) {
+            // Add our options to the HTML select
+            selectDropdown.appendChild(optionElement);
+
+            // add click event listener for the select element
+            selectDropdown.addEventListener("change", () => {
+              const selectedValue =
+                selectDropdown?.options[selectDropdown.selectedIndex].value;
+              this.toggleFlag(setting?.id ?? null, selectedValue, definition.name);
+            });
+          }
+        });
+      }
+
+      // we now have data in the DOM for this page session - prevent newer API calls
+      this.isDomLoaded = true;
     });
   }
 
