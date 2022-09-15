@@ -2,6 +2,39 @@ interface Phocas {
   get: (url: string, data: any, callback: (res: any) => void) => void;
 }
 
+type Fetched<T> = {
+  json(): Promise<T>;
+}
+
+export function fetchWithCsrf<T>(url: string, { method = "GET", headers, body }: { method: 'GET' | 'PUT' | 'POST', headers?: { [key: string]: string}, body?: string }): Promise<Fetched<T>> {
+  return new Promise((resolve, reject) => {
+    const req = new XMLHttpRequest();
+
+    req.addEventListener("load", () => {
+      resolve({
+        json: () => new Promise((resolve, reject) => {
+          try {
+            resolve(JSON.parse(req.responseText));
+          } catch (err) {
+            reject(err);
+          }
+        })
+      })
+    });
+    req.addEventListener("error", () => {
+      reject(req.responseText);
+    });
+
+    req.open(method, url);
+    if (headers) {
+      Object.keys(headers).forEach((key) => {
+        req.setRequestHeader(key, headers[key]);
+      })
+    }
+    req.send(body);
+  });
+}
+
 declare global {
   interface Window {
     phocas?: Phocas;

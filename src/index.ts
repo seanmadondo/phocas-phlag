@@ -1,5 +1,5 @@
 const css = require("./style.css");
-import { shouldPhlagStart, getBaseUrl, sanitizeString } from "./utils";
+import { shouldPhlagStart, getBaseUrl, sanitizeString, fetchWithCsrf } from "./utils";
 import {
   OPACITY_DURATION_MILLIS,
   Phocas_Features_Link,
@@ -80,7 +80,7 @@ class PhocasPhlag implements FlagUserInterface {
   }
 
   async loadGlobalFlags() {
-    const response = await fetch(
+    const response = await fetchWithCsrf<void>(
       `${getBaseUrl()}/Administration/SystemSettings/Grid`,
       {
         method: "POST",
@@ -99,7 +99,7 @@ class PhocasPhlag implements FlagUserInterface {
   }
   
   async loadFlagDefinitions(): Promise<FeatureFlag[]> {
-    const response = await fetch(`${getBaseUrl()}/api/settings/feature-flags`);
+    const response = await fetchWithCsrf<FeatureFlag[]>(`${getBaseUrl()}/api/settings/feature-flags`, { method: "GET" });
     return response.json() as Promise<FeatureFlag[]>;
   }
 
@@ -119,14 +119,16 @@ class PhocasPhlag implements FlagUserInterface {
     }
 
     if (id === null) {
-      this.createFlag(featureName, newValue);
+      await this.createFlag(featureName, newValue);
     } else {
-      this.updateFlag(id, featureName, newValue);
+      await this.updateFlag(id, featureName, newValue);
     }
+
+    window.location.reload();
   }
 
   createFlag(name: string, value: string | boolean) {
-    return fetch(`${getBaseUrl()}/api/settings`, {
+    return fetchWithCsrf(`${getBaseUrl()}/api/settings`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -139,7 +141,7 @@ class PhocasPhlag implements FlagUserInterface {
   }
 
   updateFlag(id: number, name: string, value: string | boolean) {
-    return fetch(`${getBaseUrl()}/api/settings/${id}`, {
+    return fetchWithCsrf(`${getBaseUrl()}/api/settings/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -178,8 +180,6 @@ class PhocasPhlag implements FlagUserInterface {
       const value = setting === null ? definition.defaultValue === null ? false : JSON.parse(definition.defaultValue) : setting.value;
       const inputId = setting?.id ?? PhocasPhlag.generateUniqueId();
 
-      console.log(definition.name, "Value is: \"" + value + "\"")
-      
       if (
         value.toLowerCase() === "true" ||
         value.toLowerCase() === "false"
