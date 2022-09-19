@@ -4,13 +4,15 @@ export interface FlagUserInterface {
   loadGlobalFlags: () => Promise<void>;
 }
 
+export type FeatureFlagValue = string | boolean;
+
 export interface FlagToggleSetting {
   id: number;
   featureName: string;
   value: string;
 }
 
-export type FeatureFlagScope = 'Organisation' | 'User';
+export type FeatureFlagScope = 'Environment' | 'Organisation' | 'User';
 
 export type FeatureFlag = {
   name: string;
@@ -18,7 +20,7 @@ export type FeatureFlag = {
   description: string | null;
   type: string | null;
   owners: string[];
-  scope: FeatureFlagScope | null;
+  scopes: FeatureFlagScope[] | null;
   defaultValue: string | null;
   possibleValues: string[] | null;
   helpUrl: string | null;

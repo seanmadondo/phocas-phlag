@@ -7,7 +7,6 @@ import {
 } from "./constants";
 
 import { FeatureFlag, FlagUserInterface } from "./types";
-import { MultiValueFeatures } from "./features";
 
 class PhocasPhlag implements FlagUserInterface {
   hidden = true;
@@ -110,12 +109,12 @@ class PhocasPhlag implements FlagUserInterface {
   async toggleFlag(id: number | null, value: string, featureName: string) {
     let newValue: string | boolean;
 
-    if (Object.keys(MultiValueFeatures).includes(featureName)) {
-      // If we're working with string options...
-      newValue = value;
-    } else {
+    if (value.toLowerCase() === "true" || value.toLowerCase() === "false") {
       // we're working with booleans
       newValue = !(value.toLocaleLowerCase() === "true")
+    } else {
+      // If we're working with string options...
+      newValue = value;
     }
 
     if (id === null) {
@@ -227,13 +226,14 @@ class PhocasPhlag implements FlagUserInterface {
 
         // Build the list of options and append to the row
         definition.possibleValues?.forEach((possibleValue) => {
+          const unwrappedValue = JSON.parse(possibleValue);
           const optionElement = document.createElement("option");
 
-          optionElement.value = possibleValue;
-          optionElement.text = possibleValue;
+          optionElement.value = unwrappedValue;
+          optionElement.text = unwrappedValue;
 
           // set the active option
-          if (value === possibleValue) {
+          if (value === unwrappedValue) {
             optionElement.selected = true;
           }
 
