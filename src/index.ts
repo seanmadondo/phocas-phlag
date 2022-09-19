@@ -6,7 +6,7 @@ import {
   PhlagDocoLink,
 } from "./constants";
 
-import { FeatureFlag, FlagUserInterface } from "./types";
+import { FeatureFlag, FeatureFlagValue, FlagUserInterface } from "./types";
 
 class PhocasPhlag implements FlagUserInterface {
   hidden = true;
@@ -107,7 +107,7 @@ class PhocasPhlag implements FlagUserInterface {
   }
 
   async toggleFlag(id: number | null, value: string, featureName: string) {
-    let newValue: string | boolean;
+    let newValue: FeatureFlagValue;
 
     if (value.toLowerCase() === "true" || value.toLowerCase() === "false") {
       // we're working with booleans
@@ -126,7 +126,7 @@ class PhocasPhlag implements FlagUserInterface {
     window.location.reload();
   }
 
-  createFlag(name: string, value: string | boolean) {
+  createFlag(name: string, value: FeatureFlagValue) {
     return fetchWithCsrf(`${getBaseUrl()}/api/settings`, {
       method: "POST",
       headers: {
@@ -139,7 +139,7 @@ class PhocasPhlag implements FlagUserInterface {
     })
   }
 
-  updateFlag(id: number, name: string, value: string | boolean) {
+  updateFlag(id: number, name: string, value: FeatureFlagValue) {
     return fetchWithCsrf(`${getBaseUrl()}/api/settings/${id}`, {
       method: "PUT",
       headers: {
