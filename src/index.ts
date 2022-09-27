@@ -1,18 +1,30 @@
 const css = require("./style.css");
-import { shouldPhlagStart, getBaseUrl, sanitizeString, fetchWithCsrf } from "./utils";
+import { shouldPhlagStart, getBaseUrl, sanitizeString, fetchWithCsrf, IApiClient, ApiClient } from "./utils";
 import {
   OPACITY_DURATION_MILLIS,
   Phocas_Features_Link,
   PhlagDocoLink,
 } from "./constants";
 
-import { FeatureFlag, FeatureFlagValue, FlagUserInterface } from "./types";
+import { FeatureFlag, FeatureFlagScope, FeatureFlagValue, FlagUserInterface, SettingDto } from "./types";
+import { OrganisationSettingService, UserSettingService } from "./settingServices";
 
 class PhocasPhlag implements FlagUserInterface {
   hidden = true;
   overlay: HTMLDivElement | null = null;
   phlagDialog: HTMLDivElement | null = null;
   isDomLoaded: boolean = false;
+
+  private client: IApiClient;
+  private userSettingService: UserSettingService;
+  private orgSettingService: OrganisationSettingService;
+
+  constructor()
+  {
+    this.client = new ApiClient(getBaseUrl());
+    this.userSettingService = new UserSettingService(this.client);
+    this.orgSettingService = new OrganisationSettingService(this.client);
+  }
 
   createPhlagDialog() {
     const div = document.createElement("div");
@@ -78,35 +90,39 @@ class PhocasPhlag implements FlagUserInterface {
     return false;
   }
 
-  async loadGlobalFlags() {
-    const response = await fetchWithCsrf<void>(
-      `${getBaseUrl()}/Administration/SystemSettings/Grid`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          keysOnly: false,
-          pageIndex: 0,
-          sortColumn: "",
-          sortDescending: false,
-        }),
-      }
-    );
-    return response.json();
+  private static getMostNarrowScope(scopes: FeatureFlagScope[]): FeatureFlagScope {
+    if (scopes.includes("User")) {
+      return "User";
+    }
+
+    if (scopes.includes("Organisation")) {
+      return "Organisation";
+    }
+
+    if (scopes.includes("Environment")) {
+      return "Environment";
+    }
+
+    throw new Error("Cannot find the most narrow scope of no scopes!");
+  }
+
+  async loadFlagValues(): Promise<SettingDto[]> {
+    return (await Promise.all([
+      this.userSettingService.getAll(),
+      this.orgSettingService.getAll()
+    ])).flat();
   }
   
   async loadFlagDefinitions(): Promise<FeatureFlag[]> {
-    const response = await fetchWithCsrf<FeatureFlag[]>(`${getBaseUrl()}/api/settings/feature-flags`, { method: "GET" });
+    const response = await this.client.get("/api/settings/feature-flags");
     return response.json() as Promise<FeatureFlag[]>;
   }
 
-  async fetchFlagDataInParallel(): Promise<[FeatureFlag[], any]> {
-    return Promise.all([this.loadFlagDefinitions(), this.loadGlobalFlags()])
+  async fetchFlagDataInParallel(): Promise<[FeatureFlag[], SettingDto[]]> {
+    return Promise.all([this.loadFlagDefinitions(), this.loadFlagValues()])
   }
 
-  async toggleFlag(id: number | null, value: string, featureName: string) {
+  async toggleFlag(id: number | null, value: string, definition: FeatureFlag) {
     let newValue: FeatureFlagValue;
 
     if (value.toLowerCase() === "true" || value.toLowerCase() === "false") {
@@ -118,38 +134,65 @@ class PhocasPhlag implements FlagUserInterface {
     }
 
     if (id === null) {
-      await this.createFlag(featureName, newValue);
+      await this.createFlag(definition.name, newValue, definition);
     } else {
-      await this.updateFlag(id, featureName, newValue);
+      await this.updateFlag(id, definition.name, newValue, definition);
     }
 
     window.location.reload();
   }
 
-  createFlag(name: string, value: FeatureFlagValue) {
-    return fetchWithCsrf(`${getBaseUrl()}/api/settings`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        value
-      })
-    })
+  createFlag(name: string, value: FeatureFlagValue, definition: FeatureFlag) {
+    const scope = PhocasPhlag.getMostNarrowScope(definition.scopes);
+
+    const setting: Omit<SettingDto, "id"> = {
+      name,
+      value
+    };
+
+    switch (scope)
+    {
+      case "Environment":
+        throw new Error();
+      case "Organisation":
+        return this.orgSettingService.create(setting);
+      case "User":
+        const userId = window.phocas?.app.user.id;
+        if (typeof userId === "undefined") {
+          throw new Error("Cannot find the user's ID.");
+        }
+        return this.userSettingService.create({
+          ...setting,
+          userId
+        });
+    }
+
+    
   }
 
-  updateFlag(id: number, name: string, value: FeatureFlagValue) {
-    return fetchWithCsrf(`${getBaseUrl()}/api/settings/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        value
-      })
-    });
+  updateFlag(id: number, name: string, value: FeatureFlagValue, definition: FeatureFlag) {
+    const scope = PhocasPhlag.getMostNarrowScope(definition.scopes);
+    const setting: SettingDto = {
+      id,
+      name,
+      value,
+    };
+
+    switch (scope) {
+      case "Environment":
+        throw new Error();
+      case "Organisation":
+        return this.orgSettingService.update(setting);
+      case "User":
+        const userId = window.phocas?.app.user.id;
+        if (typeof userId === "undefined" || userId == null) {
+          throw new Error("Could not find userId");
+        }
+        return this.userSettingService.update({
+          ...setting,
+          userId
+        });
+    }
   }
 
   static generateUniqueId() {
@@ -165,19 +208,15 @@ class PhocasPhlag implements FlagUserInterface {
       return;
     }
 
-    const [definitions, rawData] = await this.fetchFlagDataInParallel();
+    const [definitions, values] = await this.fetchFlagDataInParallel();
     const flagContainerDiv = document.getElementById("flag-container");
 
-    const data: { id: number, name: string, value: string }[] = rawData.Rows.map((setting: any) => ({
-      id: parseInt(setting.Values.ID),
-      name: sanitizeString(setting.Values.Name),
-      value: (() => { try { return JSON.parse(setting.Values.Value).toString(); } catch { return setting.Values.Value; }})()
-    }));
-
     definitions.forEach((definition) => {
-      const setting = data.find(({name}) => definition.name === name) ?? null;
+      const setting = values.find(({name}) => definition.name === name) ?? null;
       const value = setting === null ? definition.defaultValue === null ? false : JSON.parse(definition.defaultValue) : setting.value;
       const inputId = setting?.id ?? PhocasPhlag.generateUniqueId();
+      const scope = PhocasPhlag.getMostNarrowScope(definition.scopes);
+      const disabled = scope === "Environment";
 
       if (
         value.toLowerCase() === "true" ||
@@ -189,7 +228,7 @@ class PhocasPhlag implements FlagUserInterface {
           <div>
           <input type="checkbox" class="flagCheckbox" id="flag-${inputId}" ${
           value.toLowerCase() === "true" && "checked"
-        }></input><label class="flagCheckboxLabel" for="flag-${inputId}" id="label-flag-${inputId}"></label>
+        } ${disabled && "disabled"} /><label class="flagCheckboxLabel" for="flag-${inputId}" id="label-flag-${inputId}"></label>
           </div>
         </div>`;
 
@@ -203,9 +242,11 @@ class PhocasPhlag implements FlagUserInterface {
             this.toggleFlag(
               setting?.id ?? null,
               value,
-              definition.name
+              definition,
             );
           });
+
+        return;
       }
 
       //Build a row for features with string options
@@ -216,7 +257,7 @@ class PhocasPhlag implements FlagUserInterface {
         let flagRow = `<div class='flag-row'>
           <div class='flag-title'>${definition.name} </div>
           <div>
-            <select class="feature-select" id="select-${inputId}">
+            <select class="feature-select" id="select-${inputId}" ${disabled && "disabled"}>
             </select>
           </div>
         </div>`;
@@ -249,15 +290,15 @@ class PhocasPhlag implements FlagUserInterface {
             selectDropdown.addEventListener("change", () => {
               const selectedValue =
                 selectDropdown?.options[selectDropdown.selectedIndex].value;
-              this.toggleFlag(setting?.id ?? null, selectedValue, definition.name);
+              this.toggleFlag(setting?.id ?? null, selectedValue, definition);
             });
           }
         });
       }
-
-      // we now have data in the DOM for this page session - prevent newer API calls
-      this.isDomLoaded = true;
     });
+
+    // we now have data in the DOM for this page session - prevent newer API calls
+    this.isDomLoaded = true;
   }
 
   private fadeIn() {

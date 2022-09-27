@@ -1,7 +1,8 @@
 export interface FlagUserInterface {
   hide: () => boolean;
   show: () => boolean;
-  loadGlobalFlags: () => Promise<void>;
+  loadFlagValues: () => Promise<SettingDto[]>;
+  loadFlagDefinitions: () => Promise<FeatureFlag[]>;
 }
 
 export type FeatureFlagValue = string | boolean;
@@ -12,6 +13,16 @@ export interface FlagToggleSetting {
   value: string;
 }
 
+export type SettingDto = {
+  id: number;
+  name: string;
+  value: FeatureFlagValue;
+}
+
+export type UserSettingDto = SettingDto & {
+  userId: number;
+}
+
 export type FeatureFlagScope = 'Environment' | 'Organisation' | 'User';
 
 export type FeatureFlag = {
@@ -20,7 +31,7 @@ export type FeatureFlag = {
   description: string | null;
   type: string | null;
   owners: string[];
-  scopes: FeatureFlagScope[] | null;
+  scopes: FeatureFlagScope[];
   defaultValue: string | null;
   possibleValues: string[] | null;
   helpUrl: string | null;

@@ -1,5 +1,10 @@
 interface Phocas {
   get: (url: string, data: any, callback: (res: any) => void) => void;
+  app: {
+    user: {
+      id: number;
+    }
+  }
 }
 
 type Fetched<T> = {
@@ -83,5 +88,44 @@ const shouldPhlagStart = async () => {
   }
   return true;
 };
+
+export interface IApiClient
+{
+  get<T>(path: string): Promise<Fetched<T>>;
+  post<T>(path: string, body: any): Promise<Fetched<T>>;
+  put<T>(path: string, body: any): Promise<Fetched<T>>;
+}
+
+export class ApiClient implements IApiClient
+{
+  private baseUrl: string;
+
+  constructor(baseUrl: string)
+  {
+    this.baseUrl = baseUrl;
+  }
+
+  private fetch<T>(method: "GET" | "POST" |  "PUT", path: string, body?: any) {
+    return fetchWithCsrf<T>(this.baseUrl + path, {
+      method,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: typeof body !== "undefined" ? JSON.stringify(body) : undefined
+    })
+  }
+
+  public get<T>(path: string) {
+    return this.fetch<T>("GET", path);
+  }
+
+  public post<T>(path: string, body: any) {
+    return this.fetch<T>("POST", path, body);
+  }
+
+  public put<T>(path: string, body: any) {
+    return this.fetch<T>("PUT", path, body);
+  }
+}
 
 export { isEnvironmentConsole, shouldPhlagStart };
