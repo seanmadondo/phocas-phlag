@@ -23,7 +23,7 @@ class PhocasPhlag implements FlagUserInterface {
     <a target="_blank" href="${Phocas_Features_Link}" id="phlag-header">Go to feature flag documentation...</a>
     <div id="flag-container"></div>
     <div id="flag-footer">
-      <a target="_blank" href="${PhlagDocoLink}" >Version 1.2.0</a>
+      <a target="_blank" href="${PhlagDocoLink}" >Version 1.2.1</a>
       <button id="beta-button" class="disabled">BETA</button>
     </div>
     </div>

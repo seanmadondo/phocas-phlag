@@ -1,9 +1,9 @@
 export const getFeatureFlagOptions = (feature: string) => {
   switch (feature) {
     case MultiValueFeatures.Feature_NextGenQuery:
-      return ["None", "Verify", "ClassicFallback"];
+      return ["None", "Verify", "ClassicFallback", "NextGenOnly"];
     case MultiValueFeatures.Feature_NextGenETL:
-      return ["None", "PostClassicBuild"];
+      return ["None", "PostClassicBuild", "DesignerBuild"];
     case MultiValueFeatures.SyncStorageProvider:
       return ["FS", "S3"];
     default:
