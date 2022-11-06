@@ -114,11 +114,13 @@ export class PhocasPhlag implements FlagUserInterface {
       const feature: Feature = {
         id: setting.Key,
         name: sanitizeString(setting.Values.Name),
-        value: setting.Values.Value.toLowerCase(),
+        value: setting.Values.Value,
       };
 
-      const sanitizedFeatureName = sanitizeString(setting.Values.Name);
-      if (feature.value === "true" || feature.value === "false") {
+      if (
+        feature.value.toLowerCase() === "true" ||
+        feature.value.toLowerCase() === "false"
+      ) {
         // Build the row and set the boolean
         let flagRow = createBooleanFlagRow(feature);
 
@@ -129,17 +131,14 @@ export class PhocasPhlag implements FlagUserInterface {
         document
           .querySelector(`input[id="flag-${feature.id}"]`)
           ?.addEventListener("change", () => {
-            this.toggleFlag(
-              setting.Key,
-              setting.Values.Value,
-              sanitizedFeatureName
-            );
+            this.toggleFlag(feature.id, feature.value, feature.name);
           });
       }
 
       //Build a row for features with string options
-      const isMultiValFeature =
-        Object.keys(MultiValueFeatures).includes(sanitizedFeatureName);
+      const isMultiValFeature = Object.keys(MultiValueFeatures).includes(
+        feature.name
+      );
       if (isMultiValFeature) {
         // Build the row and set the string values
         let flagRow = createMultiValueFlagRow(feature);
@@ -152,7 +151,7 @@ export class PhocasPhlag implements FlagUserInterface {
           let optionElement = document.createElement("option");
 
           // set the active option
-          if (setting.Values.Value === mode) {
+          if (feature.value === mode) {
             optionElement.value = mode;
             optionElement.text = mode;
             optionElement.selected = true;
@@ -162,7 +161,7 @@ export class PhocasPhlag implements FlagUserInterface {
           }
 
           const selectDropdown = document.getElementById(
-            `select-${setting.Key}`
+            `select-${feature.id}`
           ) as HTMLSelectElement | null;
 
           if (selectDropdown) {
