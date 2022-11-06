@@ -1,11 +1,11 @@
 export interface FlagUserInterface {
   hide: () => boolean;
   show: () => boolean;
-  loadGlobalFlags: () => Promise<void>;
+  // loadGlobalFlags: () => Promise<void>;
 }
 
-export interface FlagToggleSetting {
+export interface Feature {
   id: number;
-  featureName: string;
+  name: string;
   value: string;
 }
