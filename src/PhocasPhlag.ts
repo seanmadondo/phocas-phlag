@@ -4,14 +4,15 @@ import {
   Phocas_Features_Link,
 } from "./constants";
 import { MultiValueFeatures, getFeatureFlagOptions } from "./features";
-import { Feature, FlagUserInterface } from "./types";
+import { Feature, FlagUserInterface, User } from "./types";
 import { getBaseUrl, sanitizeString } from "./utils";
 import {
   createBooleanFlagRow,
   createMultiValueFlagRow,
   createPhlagDialog,
+  createUserFlagRow,
 } from "./UI";
-import { loadGlobalFlags } from "./client";
+import { getAllUsersForAdmin, loadGlobalFlags } from "./client";
 const css = require("./style.css");
 
 export class PhocasPhlag implements FlagUserInterface {
@@ -101,6 +102,38 @@ export class PhocasPhlag implements FlagUserInterface {
     window.location.reload();
   }
 
+  async listUsersWithFlags(feature: Feature) {
+    const data = await getAllUsersForAdmin();
+
+    // hide flag-container
+    const flagContainer = document.getElementById("flag-container");
+    if (flagContainer) {
+      flagContainer.style.display = "none";
+    }
+
+    // show users container
+    let userFlagContainer = document.getElementById("user-flag-container");
+    if (userFlagContainer) {
+      userFlagContainer.style.display = "flex";
+    }
+
+    // update header title
+    let headerTitle = document.getElementById("phlag-header");
+    if (headerTitle) {
+      headerTitle.textContent = feature.name;
+    }
+
+    // list all users under this administrator
+    data.map((user: User) => {
+      let userRow = createUserFlagRow(feature, user);
+
+      // Add to our user flag container
+      userFlagContainer?.insertAdjacentHTML("beforeend", userRow);
+    });
+
+    // console.log(data);
+  }
+
   async showGlobaFlags() {
     if (this.isDomLoaded) {
       return;
@@ -109,6 +142,12 @@ export class PhocasPhlag implements FlagUserInterface {
     const data = await loadGlobalFlags();
     let flagsList = data.Rows;
     let flagContainerDiv = document.getElementById("flag-container");
+
+    // hide user level flags container
+    let userFlagContainerDiv = document.getElementById("user-flag-container");
+    if (userFlagContainerDiv) {
+      userFlagContainerDiv.style.display = "none";
+    }
 
     flagsList.map((setting: any) => {
       const feature: Feature = {
@@ -132,6 +171,13 @@ export class PhocasPhlag implements FlagUserInterface {
           .querySelector(`input[id="flag-${feature.id}"]`)
           ?.addEventListener("change", () => {
             this.toggleFlag(feature.id, feature.value, feature.name);
+          });
+
+        // add click event for user level page
+        document
+          .getElementById(`user-icon-${feature.id}`)
+          ?.addEventListener("click", () => {
+            this.listUsersWithFlags(feature);
           });
       }
 

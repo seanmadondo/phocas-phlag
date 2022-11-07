@@ -9,3 +9,8 @@ export interface Feature {
   name: string;
   value: string;
 }
+
+export interface User {
+  id: number;
+  name: string;
+}

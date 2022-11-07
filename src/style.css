@@ -61,7 +61,28 @@
   background-color: #B5B6B6;
   border-radius: 10px;
 }
+ /* -------------------------------------------- */
 
+ #user-flag-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  height: 510px;
+  border-top: 1px solid #D3D3D3;
+ }
+
+ #user-flag-container::-webkit-scrollbar {
+  width: 6px;
+  background-color: none;
+}
+
+#user-flag-container::-webkit-scrollbar-thumb {
+  background-color: #B5B6B6;
+  border-radius: 10px;
+}
+/* -------------------------------------------- */
 
 .flag-row {
   display: flex;
@@ -162,3 +183,48 @@
 }
 
 /* ---------- --------- ---------- */
+
+/* ---------- User icon ---------- */
+.user-icon{
+  /* font-size: 20px;
+  border-radius:10px; 
+  border:1px solid #5DD2EB;
+  height:20px; 
+  width: 20px;
+  background-color: #5DD2EB; */
+  margin-left: 8px;
+  display: block;
+  transform: scale(var(--ggs,1));
+  box-sizing: border-box;
+  width: 15px;
+  height: 22px;
+  color: grey;
+}
+
+.user-icon::after,
+.user-icon::before {
+    content: "";
+    display: block;
+    box-sizing: border-box;
+    position: absolute;
+    border: 2px solid
+}
+.user-icon::before {
+    width: 8px;
+    height: 8px;
+    border-radius: 30px;
+    top: 0;
+    left: 2px
+}
+.user-icon::after {
+    width: 12px;
+    height: 9px;
+    border-bottom: 0;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    top: 9px
+}
+
+.user-icon:hover {
+  color: #5DD2EB;
+}
