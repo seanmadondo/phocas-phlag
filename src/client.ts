@@ -33,7 +33,7 @@ export async function getAllUsersForAdmin() {
   return response.json();
 }
 
-export async function getCurrentUserSettings(userID: number) {
+export async function getSettingsByID(userID: number) {
   const response = await fetch(
     `${getBaseUrl()}/Administration/UserSettings/Grid`,
     {

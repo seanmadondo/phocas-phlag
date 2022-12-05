@@ -11,7 +11,15 @@ export const createPhlagDialog = (
   div.id = "phlag-container";
   div.innerHTML = `
         <div id="phlag">
-          <div id="phlag-header">Global Features</div>
+          <div id="phlag-header">
+            <select class="mode-select" id="mode-select">
+              <option value="Global" selected>Global</option>
+              <option value="By User">User</option>
+            </select>
+            <select class="user-mode-feature-select" id="user-mode-feature-select" hidden>
+              <option selected disabled hidden>Choose a user...</option>
+            </select>
+          </div>
           <div id="flag-container"></div>
           <div id="user-flag-container"></div>
           <div id="flag-footer">
@@ -35,7 +43,7 @@ export const createBooleanFlagRow = ({ id, name, value }: Feature) => {
                 <input type="checkbox" class="flagCheckbox" id="flag-${id}" ${
     value.toLowerCase() === "true" && "checked"
   }></input><label class="flagCheckboxLabel" for="flag-${id}" id="label-flag-${id}"></label>
-                <div class="user-icon" id="user-icon-${id}"></div>
+                <!--<div class="user-icon" id="user-icon-${id}"></div> -->
               </div>
           </div>`;
 };
@@ -50,17 +58,13 @@ export const createMultiValueFlagRow = ({ id, name, value }: Feature) => {
 </div>`;
 };
 
-export const createUserFlagRow = (feature: Feature, user: User) => {
+export const createUserFlagRow = (user: User) => {
   return `<div class='flag-row'>
             <div class='flag-title'>${user.name} </div>
               <div style='display: flex; flex-direction: row; align-items: center;'>
-                <input type="checkbox" class="flagCheckbox" id="flag-${
-                  user.id
-                }" ${
-    feature.value.toLowerCase() === "true" && "checked"
-  }></input><label class="flagCheckboxLabel" for="flag-${
-    user.id
-  }" id="label-flag-${user.id}"></label>
+                <input type="checkbox" class="flagCheckbox" id="flag-${user.id}" 
+                  "checked"}>
+                </input><label class="flagCheckboxLabel" for="flag-${user.id}" id="label-flag-${user.id}"></label>
               </div>
           </div>`;
 };

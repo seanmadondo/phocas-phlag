@@ -37,15 +37,15 @@
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
-#phlag-header {
+/* #phlag-header {
   font-size: 15px;
   font-weight: bold;
-}
+} */
 
 #flag-container {
   display: flex;
   flex-direction: column;
-  margin-top: 10px;
+  margin-top: 5px;
   overflow-y: scroll;
   overflow-x: hidden;
   height: 510px;
@@ -66,7 +66,7 @@
  #user-flag-container {
   display: flex;
   flex-direction: column;
-  margin-top: 10px;
+  margin-top: 5px;
   overflow-y: scroll;
   overflow-x: hidden;
   height: 510px;
@@ -104,7 +104,7 @@
   display: flex;
   flex-direction: row-reverse;
   border-top: 1px solid #D3D3D3;
-  padding-top: 10px;
+  padding-top: 5px;
 }
 
 #beta-button {
@@ -117,7 +117,7 @@
   margin-right: 5px;
 }
 
-/* ---------- Select Dropdown ---------- */
+/* ---------- Select Dropdowns ---------- */
 .feature-select {
   width: 100%;
   height: 35px;
@@ -133,6 +133,40 @@
   background-color: #fff;
   background-image: linear-gradient(to top, #f9f9f9, #fff 33%);
 
+}
+
+.mode-select {
+  width: 150px;
+  height: 35px;
+  min-width: 155px;
+  border: 1px solid #5DD2EB;
+  color: inherit;
+  outline: none;
+  border-radius: 4px;
+  padding: 4px 4px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1.1;
+  background-color: #fff;
+  background-image: linear-gradient(to top, #f9f9f9, #fff 33%);
+}
+
+.user-mode-feature-select {
+  width: 225px;
+  height: 35px;
+  min-width: 155px;
+  border: 1px solid #5DD2EB;
+  color: inherit;
+  outline: none;
+  border-radius: 4px;
+  margin-left: 10px;
+  padding: 4px 4px;
+  font-size: 15px;
+  cursor: pointer;
+  line-height: 1.1;
+  background-color: #fff;
+  background-image: linear-gradient(to top, #f9f9f9, #fff 33%);
 }
 
 /* ---------- --------- ---------- */
