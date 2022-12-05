@@ -103,7 +103,6 @@ export class PhocasPhlag implements FlagUserInterface {
         }
 
         if (selectedValue === "By User") {
-          // this.listUsersWithFlags();
           this.setUserMode();
 
           //show the User Mode Feature select
