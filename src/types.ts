@@ -14,3 +14,10 @@ export interface User {
   id: number;
   name: string;
 }
+
+export interface JsonBodyProps {
+  name: string;
+  value: string | boolean;
+  id: number;
+  userID: number;
+}
