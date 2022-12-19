@@ -149,11 +149,10 @@ export class PhocasPhlag implements FlagUserInterface {
       };
     }
 
-    console.log(jsonBody);
     setUserFeature(jsonBody);
 
     this.hide();
-    // window.location.reload();
+    window.location.reload();
   }
 
   async toggleFlag(id: number, value: string, featureName: string) {
